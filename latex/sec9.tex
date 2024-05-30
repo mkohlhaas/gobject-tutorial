@@ -1,0 +1,992 @@
+\section{Interface}\label{interface}
+
+Interface is similar to abstract class. Interface defines virtual
+functions which are expected to be overridden by a function in another
+instantiable object.
+
+This section provides a simple example, TComparable. TComparable is an
+interface. It defines functions to compare. They are:
+
+\begin{itemize}
+\tightlist
+\item
+  \passthrough{\lstinline!t\_comparable\_cmp (self, other)!}: It
+  compares \passthrough{\lstinline!self!} and
+  \passthrough{\lstinline!other!}. The first argument
+  \passthrough{\lstinline!self!} is an instance on which
+  \passthrough{\lstinline!t\_comparable\_cmp!} runs. The second argument
+  \passthrough{\lstinline!other!} is another instance. This function
+  needs to be overridden in an object which implements the interface.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    If \passthrough{\lstinline!self!} is equal to
+    \passthrough{\lstinline!other!},
+    \passthrough{\lstinline!t\_comparable\_cmp!} returns 0.
+  \item
+    If \passthrough{\lstinline!self!} is greater than
+    \passthrough{\lstinline!other!},
+    \passthrough{\lstinline!t\_comparable\_cmp!} returns 1.
+  \item
+    If \passthrough{\lstinline!self!} is less than
+    \passthrough{\lstinline!other!},
+    \passthrough{\lstinline!t\_comparable\_cmp!} returns -1.
+  \item
+    If an error happens, \passthrough{\lstinline!t\_comparable\_cmp!}
+    returns -2.
+  \end{itemize}
+\item
+  \passthrough{\lstinline!t\_comparable\_eq (self, other)!}: It returns
+  TRUE if \passthrough{\lstinline!self!} is equal to
+  \passthrough{\lstinline!other!}. Otherwise it returns FALSE. You need
+  to be careful that FALSE is returned even if an error occurs.
+\item
+  \passthrough{\lstinline!t\_comparable\_gt (self, other)!}: It returns
+  TRUE if \passthrough{\lstinline!self!} is greater than
+  \passthrough{\lstinline!other!}. Otherwise it returns FALSE.
+\item
+  \passthrough{\lstinline!t\_comparable\_lt (self, other)!}: It returns
+  TRUE if \passthrough{\lstinline!self!} is less than
+  \passthrough{\lstinline!other!}. Otherwise it returns FALSE.
+\item
+  \passthrough{\lstinline!t\_comparable\_ge (self, other)!}: It returns
+  TRUE if \passthrough{\lstinline!self!} is greater than or equal to
+  \passthrough{\lstinline!other!}. Otherwise it returns FALSE.
+\item
+  \passthrough{\lstinline!t\_comparable\_le (self, other)!}: It returns
+  TRUE if \passthrough{\lstinline!self!} is less than or equal to
+  \passthrough{\lstinline!other!}. Otherwise it returns FALSE.
+\end{itemize}
+
+Numbers and strings are comparable. TInt, TDouble and TStr implement
+TComparable interface so that they can use the functions above. In
+addition, TNumStr can use the functions because it is a child class of
+TStr.
+
+For example,
+
+\begin{lstlisting}[language=C]
+TInt *i1 = t_int_new_with_value (10);
+TInt *i2 = t_int_new_with_value (20);
+t_comparable_eq (T_COMPARABLE (i1), T_COMPARABLE (i2)); /* => FALSE */
+t_comparable_lt (T_COMPARABLE (i1), T_COMPARABLE (i2)); /* => TRUE */
+\end{lstlisting}
+
+What's the difference between interface and abstract class? Virtual
+functions in an abstract class are overridden by a function in its
+descendant classes. Virtual functions in an interface are overridden by
+a function in any classes. Compare TNumber and TComparable.
+
+\begin{itemize}
+\tightlist
+\item
+  A function \passthrough{\lstinline!t\_number\_add!} is overridden in
+  TIntClass and TDoubleClass. It can't be overridden in TStrClass
+  because TStr isn't a descendant of TNumber.
+\item
+  A function \passthrough{\lstinline!t\_comparable\_cmp!} is overridden
+  in TIntClass, TDoubleClass and TStrClass.
+\end{itemize}
+
+\subsection{TComparable interface}\label{tcomparable-interface}
+
+Defining interfaces is similar to defining objects.
+
+\begin{itemize}
+\tightlist
+\item
+  Use \passthrough{\lstinline!G\_DECLARE\_INTERFACE!} instead of
+  \passthrough{\lstinline!G\_DECLARE\_FINAL\_TYPE!}.
+\item
+  Use \passthrough{\lstinline!G\_DEFINE\_INTERFACE!} instead of
+  \passthrough{\lstinline!G\_DEFINE\_TYPE!}.
+\end{itemize}
+
+Now let's see the header file.
+
+\begin{lstlisting}[language=C, numbers=left]
+#pragma once
+
+#include <glib-object.h>
+
+#define T_TYPE_COMPARABLE  (t_comparable_get_type ())
+G_DECLARE_INTERFACE (TComparable, t_comparable, T, COMPARABLE, GObject)
+
+struct _TComparableInterface {
+  GTypeInterface parent;
+  /* signal */
+  void (*arg_error) (TComparable *self);
+  /* virtual function */
+  int (*cmp) (TComparable *self, TComparable *other);
+};
+
+/* t_comparable_cmp */
+/* if self > other, then returns 1 */
+/* if self = other, then returns 0 */
+/* if self < other, then returns -1 */
+/* if error happens, then returns -2 */
+
+int
+t_comparable_cmp (TComparable *self, TComparable *other);
+
+gboolean
+t_comparable_eq (TComparable *self, TComparable *other);
+
+gboolean
+t_comparable_gt (TComparable *self, TComparable *other);
+
+gboolean
+t_comparable_lt (TComparable *self, TComparable *other);
+
+gboolean
+t_comparable_ge (TComparable *self, TComparable *other);
+
+gboolean
+t_comparable_le (TComparable *self, TComparable *other);
+\end{lstlisting}
+
+\begin{itemize}
+\tightlist
+\item
+  6: \passthrough{\lstinline!G\_DECLARE\_INTERFACE!} macro. The last
+  parameter is a prerequisite of the interface. The prerequisite of
+  TComparable is GObject. So, any other object than the descendants of
+  GObject, for example GVariant, can't implement TComparable. A
+  prerequisite is the GType of either an interface or a class. This
+  macro expands to:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Declaration of \passthrough{\lstinline!t\_comparable\_get\_type()!}.
+  \item
+    \passthrough{\lstinline!Typedef struct \_TComparableInterface TComparableInterface!}
+  \item
+    \passthrough{\lstinline!T\_COMPARABLE ()!} macro. It casts an
+    instance to TComparable type.
+  \item
+    \passthrough{\lstinline!T\_IS\_COMPARABLE ()!} macro. It checks if
+    the type of an instance is
+    \passthrough{\lstinline!T\_TYPE\_COMPARABLE!}.
+  \item
+    \passthrough{\lstinline!T\_COMPARABLE\_GET\_IFACE ()!} macro. It
+    gets the interface of the instance which is given as an argument.
+  \end{itemize}
+\item
+  8-14: \passthrough{\lstinline!TComparableInterface!} structure. This
+  is similar to a class structure. The first member is the parent
+  interface. The parent of
+  \passthrough{\lstinline!TComparableInterface!} is
+  \passthrough{\lstinline!GTypeInterface!}.
+  \passthrough{\lstinline!GTypeInterface!} is a base of all interface
+  types. It is like a \passthrough{\lstinline!GTypeClass!} which is a
+  base of all class types. \passthrough{\lstinline!GTypeClass!} is the
+  first member of the structure \passthrough{\lstinline!GObjectClass!}.
+  (See \passthrough{\lstinline!gobject.h!}. Note that
+  \passthrough{\lstinline!GObjectClass!} is the same as
+  \passthrough{\lstinline!struct \_GObjectClass!}.) The next member is a
+  pointer \passthrough{\lstinline!arg\_error!} to the default signal
+  handler of ``arg-error'' signal. This signal is emitted when the
+  second argument of the comparison function is inappropriate. For
+  example, if \passthrough{\lstinline!self!} is TInt and
+  \passthrough{\lstinline!other!} is TStr, both of them are Comparable
+  instance. But they are \emph{not} able to compare. This is because
+  \passthrough{\lstinline!other!} isn't TNumber. The last member
+  \passthrough{\lstinline!cmp!} is a pointer to a comparison method. It
+  is a virtual function and is expected to be overridden by a function
+  in the object which implements the interface.
+\item
+  22-38: Public functions.
+\end{itemize}
+
+C file \passthrough{\lstinline!tcomparable.c!} is as follows.
+
+\begin{lstlisting}[language=C, numbers=left]
+#include "tcomparable.h"
+
+static guint t_comparable_signal;
+
+G_DEFINE_INTERFACE (TComparable, t_comparable, G_TYPE_OBJECT)
+
+static void
+arg_error_default_cb (TComparable *self) {
+  g_printerr ("\nTComparable: argument error.\n");
+}
+
+static void
+t_comparable_default_init (TComparableInterface *iface) {
+  /* virtual function */
+  iface->cmp = NULL;
+  /* argument error signal */
+  iface->arg_error = arg_error_default_cb;
+  t_comparable_signal =
+  g_signal_new ("arg-error",
+                T_TYPE_COMPARABLE,
+                G_SIGNAL_RUN_LAST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
+                G_STRUCT_OFFSET (TComparableInterface, arg_error),
+                NULL /* accumulator */,
+                NULL /* accumulator data */,
+                NULL /* C marshaller */,
+                G_TYPE_NONE /* return_type */,
+                0     /* n_params */
+                );
+}
+
+int
+t_comparable_cmp (TComparable *self, TComparable *other) {
+  g_return_val_if_fail (T_IS_COMPARABLE (self), -2);
+
+  TComparableInterface *iface = T_COMPARABLE_GET_IFACE (self);
+  
+  return (iface->cmp == NULL ? -2 : iface->cmp (self, other));
+}
+
+gboolean
+t_comparable_eq (TComparable *self, TComparable *other) {
+  return (t_comparable_cmp (self, other) == 0);
+}
+
+gboolean
+t_comparable_gt (TComparable *self, TComparable *other) {
+  return (t_comparable_cmp (self, other) == 1);
+}
+
+gboolean
+t_comparable_lt (TComparable *self, TComparable *other) {
+  return (t_comparable_cmp (self, other) == -1);
+}
+
+gboolean
+t_comparable_ge (TComparable *self, TComparable *other) {
+  int result = t_comparable_cmp (self, other);
+  return (result == 1 || result == 0);
+}
+
+gboolean
+t_comparable_le (TComparable *self, TComparable *other) {
+  int result = t_comparable_cmp (self, other);
+  return (result == -1 || result == 0);
+}
+\end{lstlisting}
+
+\begin{itemize}
+\tightlist
+\item
+  5: \passthrough{\lstinline!G\_DEFINE\_INTERFACE!} macro. The third
+  parameter is the type of the prerequisite. This macro expands to:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Declaration of
+    \passthrough{\lstinline!t\_comparable\_default\_init ()!}.
+  \item
+    Definition of \passthrough{\lstinline!t\_comparable\_get\_type ()!}.
+  \end{itemize}
+\item
+  7-10: \passthrough{\lstinline!arg\_error\_default\_cb!} is a default
+  signal handler of ``arg-error'' signal.
+\item
+  12- 29: \passthrough{\lstinline!t\_comparable\_default\_init!}
+  function. This function is similar to class initialization function.
+  It initializes \passthrough{\lstinline!TComparableInterface!}
+  structure.
+\item
+  15: Assigns NULL to \passthrough{\lstinline!cmp!}. So, the comparison
+  method doesn't work before an implementation class overrides it.
+\item
+  17: Set the default signal handler of the signal ``arg-error''.
+\item
+  18-28: Creates a signal ``arg-error''.
+\item
+  31-38: The function \passthrough{\lstinline!t\_comparable\_cmp!}. It
+  checks the type of \passthrough{\lstinline!self!} on the first line.
+  If it isn't comparable, it logs the error message and returns -2
+  (error). If \passthrough{\lstinline!iface->cmp!} is NULL (it means the
+  class method hasn't been overridden), then it returns -2. Otherwise it
+  calls the class method and returns the value returned by the class
+  method.
+\item
+  40-65: Public functions. These five functions are based on
+  \passthrough{\lstinline!t\_comparable\_cmp!}. Therefore, no overriding
+  is necessary for them. For example,
+  \passthrough{\lstinline!t\_comparable\_eq!} just calls
+  \passthrough{\lstinline!t\_comparable\_cmp!}. And it returns TRUE if
+  \passthrough{\lstinline!t\_comparable\_cmp!} returns zero. Otherwise
+  it returns FALSE.
+\end{itemize}
+
+This program uses a signal to give the argument type error information
+to a user. This error is usually a program error rather than a run-time
+error. Using a signal to report a program error is not a good way. The
+best way is using \passthrough{\lstinline!g\_return\_if\_fail!}. The
+reason why I made this signal is just I wanted to show how to implement
+a signal in interfaces.
+
+\subsection{Implementing interface}\label{implementing-interface}
+
+TInt, TDouble and TStr implement TComparable. First, look at TInt. The
+header file is the same as before. The implementation is written in C
+file.
+
+\passthrough{\lstinline!tint.c!} is as follows.
+
+\begin{lstlisting}[language=C, numbers=left]
+#include "../tnumber/tnumber.h"
+#include "../tnumber/tint.h"
+#include "../tnumber/tdouble.h"
+#include "tcomparable.h"
+
+enum {
+  PROP_0,
+  PROP_INT,
+  N_PROPERTIES
+};
+
+static GParamSpec *int_properties[N_PROPERTIES] = {NULL, };
+
+struct _TInt {
+  TNumber parent;
+  int value;
+};
+
+static void t_comparable_interface_init (TComparableInterface *iface);
+
+G_DEFINE_TYPE_WITH_CODE (TInt, t_int, T_TYPE_NUMBER,
+                         G_IMPLEMENT_INTERFACE (T_TYPE_COMPARABLE, t_comparable_interface_init))
+
+static int
+t_int_comparable_cmp (TComparable *self, TComparable *other) {
+  if (! T_IS_NUMBER (other)) {
+    g_signal_emit_by_name (self, "arg-error");
+    return -2;
+  }
+
+  int i;
+  double s, o;
+
+  s = (double) T_INT (self)->value;
+  if (T_IS_INT (other)) {
+    g_object_get (other, "value", &i, NULL);
+    o = (double) i;
+  } else
+    g_object_get (other, "value", &o, NULL);
+  if (s > o)
+    return 1;
+  else if (s == o)
+    return 0;
+  else if (s < o)
+    return -1;
+  else /* This can't happen. */
+    return -2;
+}
+
+static void
+t_comparable_interface_init (TComparableInterface *iface) {
+  iface->cmp = t_int_comparable_cmp;
+}
+
+static void
+t_int_set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec) {
+  TInt *self = T_INT (object);
+
+  if (property_id == PROP_INT)
+    self->value = g_value_get_int (value);
+  else
+    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+}
+
+static void
+t_int_get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec) {
+  TInt *self = T_INT (object);
+
+  if (property_id == PROP_INT)
+    g_value_set_int (value, self->value);
+  else
+    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+}
+
+static void
+t_int_init (TInt *self) {
+}
+
+/* arithmetic operator */
+/* These operators create a new instance and return a pointer to it. */
+#define t_int_binary_op(op) \
+  int i; \
+  double d; \
+  if (T_IS_INT (other)) { \
+    g_object_get (T_INT (other), "value", &i, NULL); \
+    return  T_NUMBER (t_int_new_with_value (T_INT(self)->value op i)); \
+  } else { \
+    g_object_get (T_DOUBLE (other), "value", &d, NULL); \
+    return  T_NUMBER (t_int_new_with_value (T_INT(self)->value op (int) d)); \
+  }
+
+static TNumber *
+t_int_add (TNumber *self, TNumber *other) {
+  g_return_val_if_fail (T_IS_INT (self), NULL);
+
+  t_int_binary_op (+)
+}
+
+static TNumber *
+t_int_sub (TNumber *self, TNumber *other) {
+  g_return_val_if_fail (T_IS_INT (self), NULL);
+
+  t_int_binary_op (-)
+}
+
+static TNumber *
+t_int_mul (TNumber *self, TNumber *other) {
+  g_return_val_if_fail (T_IS_INT (self), NULL);
+
+  t_int_binary_op (*)
+}
+
+static TNumber *
+t_int_div (TNumber *self, TNumber *other) {
+  g_return_val_if_fail (T_IS_INT (self), NULL);
+
+  int i;
+  double d;
+
+  if (T_IS_INT (other)) {
+    g_object_get (T_INT (other), "value", &i, NULL);
+    if (i == 0) {
+      g_signal_emit_by_name (self, "div-by-zero");
+      return NULL;
+    } else
+      return  T_NUMBER (t_int_new_with_value (T_INT(self)->value / i));
+  } else {
+    g_object_get (T_DOUBLE (other), "value", &d, NULL);
+    if (d == 0) {
+      g_signal_emit_by_name (self, "div-by-zero");
+      return NULL;
+    } else
+      return  T_NUMBER (t_int_new_with_value (T_INT(self)->value / (int)  d));
+  }
+}
+
+static TNumber *
+t_int_uminus (TNumber *self) {
+  g_return_val_if_fail (T_IS_INT (self), NULL);
+
+  return T_NUMBER (t_int_new_with_value (- T_INT(self)->value));
+}
+
+static char *
+t_int_to_s (TNumber *self) {
+  g_return_val_if_fail (T_IS_INT (self), NULL);
+
+  int i;
+
+  g_object_get (T_INT (self), "value", &i, NULL); 
+  return g_strdup_printf ("%d", i);
+}
+
+static void
+t_int_class_init (TIntClass *class) {
+  TNumberClass *tnumber_class = T_NUMBER_CLASS (class);
+  GObjectClass *gobject_class = G_OBJECT_CLASS (class);
+
+  /* override virtual functions */
+  tnumber_class->add = t_int_add;
+  tnumber_class->sub = t_int_sub;
+  tnumber_class->mul = t_int_mul;
+  tnumber_class->div = t_int_div;
+  tnumber_class->uminus = t_int_uminus;
+  tnumber_class->to_s = t_int_to_s;
+
+  gobject_class->set_property = t_int_set_property;
+  gobject_class->get_property = t_int_get_property;
+  int_properties[PROP_INT] = g_param_spec_int ("value", "val", "Integer value", G_MININT, G_MAXINT, 0, G_PARAM_READWRITE);
+  g_object_class_install_properties (gobject_class, N_PROPERTIES, int_properties);
+}
+
+TInt *
+t_int_new_with_value (int value) {
+  TInt *i;
+
+  i = g_object_new (T_TYPE_INT, "value", value, NULL);
+  return i;
+}
+
+TInt *
+t_int_new (void) {
+  TInt *i;
+
+  i = g_object_new (T_TYPE_INT, NULL);
+  return i;
+}
+\end{lstlisting}
+
+\begin{itemize}
+\tightlist
+\item
+  4: It needs to include the header file of TComparable.
+\item
+  19: Declaration of
+  \passthrough{\lstinline!t\_comparable\_interface\_init ()!} function.
+  This declaration must be done before
+  \passthrough{\lstinline!G\_DEFINE\_TYPE\_WITH\_CODE!} macro.
+\item
+  21-22: \passthrough{\lstinline!G\_DEFINE\_TYPE\_WITH\_CODE!} macro.
+  The last parameter is
+  \passthrough{\lstinline!G\_IMPLEMENT\_INTERFACE!} macro. The second
+  parameter of \passthrough{\lstinline!G\_IMPLEMENT\_INTERFACE!} is
+  \passthrough{\lstinline!t\_comparable\_interface\_init!}. These two
+  macros expands to:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Declaration of \passthrough{\lstinline!t\_int\_class\_init ()!}.
+  \item
+    Declaration of \passthrough{\lstinline!t\_int\_init ()!}.
+  \item
+    Definition of \passthrough{\lstinline!t\_int\_parent\_class!} static
+    variable which points to the parent's class.
+  \item
+    Definition of \passthrough{\lstinline!t\_int\_get\_type ()!}. This
+    function includes
+    \passthrough{\lstinline!g\_type\_register\_static\_simple ()!} and
+    \passthrough{\lstinline!g\_type\_add\_interface\_static ()!}. The
+    function
+    \passthrough{\lstinline!g\_type\_register\_static\_simple ()!} is a
+    convenient version of
+    \passthrough{\lstinline!g\_type\_register\_static ()!}. It registers
+    TInt type to the type system. The function
+    \passthrough{\lstinline!g\_type\_add\_interface\_static ()!} adds an
+    interface type to an instance type. There is a good example in
+    \href{https://docs.gtk.org/gobject/concepts.html\#non-instantiatable-classed-types-interfaces}{GObject
+    Reference Manual, Interfaces}. If you want to know how to write
+    codes without the macros, see
+    \passthrough{\lstinline!tint\_without\_macro.c!}.
+  \end{itemize}
+\item
+  24-48: \passthrough{\lstinline!t\_int\_comparable\_cmp!} is a function
+  to compare TInt instance to TNumber instance.
+\item
+  26-29: Checks the type of \passthrough{\lstinline!other!}. If the
+  argument type is not TNumber, it emits ``arg-error'' signal with
+  \passthrough{\lstinline!g\_signal\_emit\_by\_name!}.
+\item
+  34: Converts \passthrough{\lstinline!self!} into double.
+\item
+  35-39: Gets the value of \passthrough{\lstinline!other!} and if it is
+  TInt then the value is casted to double.
+\item
+  40-47: compares \passthrough{\lstinline!s!} and
+  \passthrough{\lstinline!o!} and returns 1, 0, -1 and -2.
+\item
+  50-53: \passthrough{\lstinline!t\_comparable\_interface\_init!}. This
+  function is called in the initialization process of TInt. The function
+  \passthrough{\lstinline!t\_int\_comparable\_cmp!} is assigned to
+  \passthrough{\lstinline!iface->cmp!}.
+\end{itemize}
+
+\passthrough{\lstinline!tdouble.c!} is almost same as
+\passthrough{\lstinline!tint.c!}. These two objects can be compared
+because int is casted to double before the comparison.
+
+\passthrough{\lstinline!tstr.c!} is as follows.
+
+\begin{lstlisting}[language=C, numbers=left]
+#include "../tstr/tstr.h"
+#include "tcomparable.h"
+
+enum {
+  PROP_0,
+  PROP_STRING,
+  N_PROPERTIES
+};
+
+static GParamSpec *str_properties[N_PROPERTIES] = {NULL, };
+
+typedef struct {
+  char *string;
+} TStrPrivate;
+
+static void t_comparable_interface_init (TComparableInterface *iface);
+
+G_DEFINE_TYPE_WITH_CODE (TStr, t_str, G_TYPE_OBJECT,
+                         G_ADD_PRIVATE (TStr)
+                         G_IMPLEMENT_INTERFACE (T_TYPE_COMPARABLE, t_comparable_interface_init))
+
+static void
+t_str_set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec) {
+  TStr *self = T_STR (object);
+
+/* The returned value of the function g_value_get_string can be NULL. */
+/* The function t_str_set_string calls a class method, */
+/* which is expected to rewrite in the descendant object. */
+  if (property_id == PROP_STRING)
+    t_str_set_string (self, g_value_get_string (value));
+  else
+    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+}
+
+static void
+t_str_get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec) {
+  TStr *self = T_STR (object);
+  TStrPrivate *priv = t_str_get_instance_private (self);
+
+/* The second argument of the function g_value_set_string can be NULL. */
+  if (property_id == PROP_STRING)
+    g_value_set_string (value, priv->string);
+  else
+    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+}
+
+/* This function just set the string. */
+/* So, no notify signal is emitted. */
+static void
+t_str_real_set_string (TStr *self, const char *s) {
+  TStrPrivate *priv = t_str_get_instance_private (self);
+
+  if (priv->string)
+    g_free (priv->string);
+  priv->string = g_strdup (s);
+}
+
+static void
+t_str_finalize (GObject *object) {
+  TStr *self = T_STR (object);
+  TStrPrivate *priv = t_str_get_instance_private (self);
+
+  if (priv->string)
+    g_free (priv->string);
+  G_OBJECT_CLASS (t_str_parent_class)->finalize (object);
+}
+
+static int
+t_str_comparable_cmp (TComparable *self, TComparable *other) {
+  if (! T_IS_STR (other)) {
+    g_signal_emit_by_name (self, "arg-error");
+    return -2;
+  }
+
+  char *s, *o;
+  int result;
+
+  s = t_str_get_string (T_STR (self));
+  o = t_str_get_string (T_STR (other));
+
+  if (strcmp (s, o) > 0)
+    result = 1;
+  else if (strcmp (s, o) == 0)
+    result = 0;
+  else if (strcmp (s, o) < 0)
+    result = -1;
+  else /* This can't happen. */
+    result = -2;
+  g_free (s);
+  g_free (o);
+  return result;
+}
+
+static void
+t_comparable_interface_init (TComparableInterface *iface) {
+  iface->cmp = t_str_comparable_cmp;
+}
+
+static void
+t_str_init (TStr *self) {
+  TStrPrivate *priv = t_str_get_instance_private (self);
+
+  priv->string = NULL;
+}
+
+static void
+t_str_class_init (TStrClass *class) {
+  GObjectClass *gobject_class = G_OBJECT_CLASS (class);
+
+  gobject_class->finalize = t_str_finalize;
+  gobject_class->set_property = t_str_set_property;
+  gobject_class->get_property = t_str_get_property;
+  str_properties[PROP_STRING] = g_param_spec_string ("string", "str", "string", "", G_PARAM_READWRITE);
+  g_object_class_install_properties (gobject_class, N_PROPERTIES, str_properties);
+
+  class->set_string = t_str_real_set_string;
+}
+
+/* setter and getter */
+void
+t_str_set_string (TStr *self, const char *s) {
+  g_return_if_fail (T_IS_STR (self));
+  TStrClass *class = T_STR_GET_CLASS (self);
+
+/* The setter calls the class method 'set_string', */
+/* which is expected to be overridden by the descendant TNumStr. */
+/* Therefore, the behavior of the setter is different between TStr and TNumStr. */
+  class->set_string (self, s);
+}
+
+char *
+t_str_get_string (TStr *self) {
+  g_return_val_if_fail (T_IS_STR (self), NULL);
+  TStrPrivate *priv = t_str_get_instance_private (self);
+
+  return g_strdup (priv->string);
+}
+
+TStr *
+t_str_concat (TStr *self, TStr *other) {
+  g_return_val_if_fail (T_IS_STR (self), NULL);
+  g_return_val_if_fail (T_IS_STR (other), NULL);
+
+  char *s1, *s2, *s3;
+  TStr *str;
+
+  s1 = t_str_get_string (self);
+  s2 = t_str_get_string (other);
+  if (s1 && s2)
+    s3 = g_strconcat (s1, s2, NULL);
+  else if (s1)
+    s3 = g_strdup (s1);
+  else if (s2)
+    s3 = g_strdup (s2);
+  else
+    s3 = NULL;
+  str = t_str_new_with_string (s3);
+  if (s1) g_free (s1);
+  if (s2) g_free (s2);
+  if (s3) g_free (s3);
+  return str;
+}
+
+/* create a new TStr instance */
+TStr *
+t_str_new_with_string (const char *s) {
+  return T_STR (g_object_new (T_TYPE_STR, "string", s, NULL));
+}
+
+TStr *
+t_str_new (void) {
+  return T_STR (g_object_new (T_TYPE_STR, NULL));
+}
+\end{lstlisting}
+
+\begin{itemize}
+\tightlist
+\item
+  16: Declares \passthrough{\lstinline!t\_comparable\_interface\_init!}
+  function. It needs to be declared before
+  \passthrough{\lstinline!G\_DEFINE\_TYPE\_WITH\_CODE!} macro.
+\item
+  18-20: \passthrough{\lstinline!G\_DEFINE\_TYPE\_WITH\_CODE!} macro.
+  Because TStr is derivable type, its private area (TStrPrivate) is
+  needed. \passthrough{\lstinline!G\_ADD\_PRIVATE!} macro makes the
+  private area. Be careful that there's no comma after
+  \passthrough{\lstinline!G\_ADD\_PRIVATE!} macro.
+\item
+  68-92: \passthrough{\lstinline!t\_str\_comparable\_cmp!}.
+\item
+  70-73: Checks the type of \passthrough{\lstinline!other!}. If it is
+  not TStr, ``arg-error'' signal is emitted.
+\item
+  78-79: Gets strings \passthrough{\lstinline!s!} and
+  \passthrough{\lstinline!o!} from TStr objects
+  \passthrough{\lstinline!self!} and \passthrough{\lstinline!other!}.
+\item
+  81-88: Compares \passthrough{\lstinline!s!} and
+  \passthrough{\lstinline!o!} with the C standard function
+  \passthrough{\lstinline!strcmp!}.
+\item
+  89-90: Frees \passthrough{\lstinline!s!} and
+  \passthrough{\lstinline!o!}.
+\item
+  91: Returns the result.
+\item
+  94-97: \passthrough{\lstinline!t\_comparable\_interface\_init!}
+  function. It overrides \passthrough{\lstinline!iface->comp!} with
+  \passthrough{\lstinline!t\_str\_comparable\_cmp!}.
+\end{itemize}
+
+TStr can be compared with TStr, but not with TInt nor TDouble.
+Generally, comparison is available between two same type instances.
+
+TNumStr itself doesn't implement TComparable. But it is a child of TStr,
+so it is comparable. The comparison is based on the alphabetical order.
+So, ``a'' is bigger than ``b'' and ``three'' is bigger than ``two''.
+
+\subsection{Test program.}\label{test-program.}
+
+\passthrough{\lstinline!main.c!} is a test program.
+
+\begin{lstlisting}[language=C, numbers=left]
+#include <glib-object.h>
+#include "tcomparable.h"
+#include "../tnumber/tnumber.h"
+#include "../tnumber/tint.h"
+#include "../tnumber/tdouble.h"
+#include "../tstr/tstr.h"
+
+static void
+t_print (const char *cmp, TComparable *c1, TComparable *c2) {
+  char *s1, *s2;
+  TStr *ts1, *ts2, *ts3;
+
+  ts1 = t_str_new_with_string("\"");
+  if (T_IS_NUMBER (c1))
+    s1 = t_number_to_s (T_NUMBER (c1));
+  else if (T_IS_STR (c1)) {
+    ts2 = t_str_concat (ts1, T_STR (c1));
+    ts3 = t_str_concat (ts2, ts1);
+    s1 = t_str_get_string (T_STR (ts3));
+    g_object_unref (ts2);
+    g_object_unref (ts3);
+  } else {
+    g_print ("c1 isn't TInt, TDouble nor TStr.\n");
+    return;
+  }
+  if (T_IS_NUMBER (c2))
+    s2 = t_number_to_s (T_NUMBER (c2));
+  else if (T_IS_STR (c2)) {
+    ts2 = t_str_concat (ts1, T_STR (c2));
+    ts3 = t_str_concat (ts2, ts1);
+    s2 = t_str_get_string (T_STR (ts3));
+    g_object_unref (ts2);
+    g_object_unref (ts3);
+  } else {
+    g_print ("c2 isn't TInt, TDouble nor TStr.\n");
+    return;
+  }
+  g_print ("%s %s %s.\n", s1, cmp, s2);
+  g_object_unref (ts1);
+  g_free (s1);
+  g_free (s2);
+}    
+
+static void
+compare (TComparable *c1, TComparable *c2) {
+  if (t_comparable_eq (c1, c2))
+    t_print ("equals", c1, c2);
+  else if (t_comparable_gt (c1, c2))
+    t_print ("is greater than", c1, c2);
+  else if (t_comparable_lt (c1, c2))
+    t_print ("is less than", c1, c2);
+  else if (t_comparable_ge (c1, c2))
+    t_print ("is greater than or equal to", c1, c2);
+  else if (t_comparable_le (c1, c2))
+    t_print ("is less than or equal to", c1, c2);
+  else
+    t_print ("can't compare to", c1, c2);
+}
+
+int
+main (int argc, char **argv) {
+  const char *one = "one";
+  const char *two = "two";
+  const char *three = "three";
+  TInt *i;
+  TDouble *d;
+  TStr *str1, *str2, *str3;
+
+  i = t_int_new_with_value (124);
+  d = t_double_new_with_value (123.45);
+  str1 = t_str_new_with_string (one);
+  str2 = t_str_new_with_string (two);
+  str3 = t_str_new_with_string (three);
+
+  compare (T_COMPARABLE (i), T_COMPARABLE (d));
+  compare (T_COMPARABLE (str1), T_COMPARABLE (str2));
+  compare (T_COMPARABLE (str2), T_COMPARABLE (str3));
+  compare (T_COMPARABLE (i), T_COMPARABLE (str1));
+
+  g_object_unref (i);
+  g_object_unref (d);
+  g_object_unref (str1);
+  g_object_unref (str2);
+  g_object_unref (str3);
+
+  return 0;
+}
+\end{lstlisting}
+
+\begin{itemize}
+\tightlist
+\item
+  8-42: The function \passthrough{\lstinline!t\_print!} has three
+  parameters and builds an output string, then shows it to the display.
+  When it builds the output, strings are surrounded with double quotes.
+\item
+  44-58: The function \passthrough{\lstinline!compare!} compares two
+  TComparable objects and calls \passthrough{\lstinline!t\_print!} to
+  display the result.
+\item
+  60-87: \passthrough{\lstinline!main!} function.
+\item
+  69-73: Creates TInt, TDouble and three TStr instances. They are given
+  values.
+\item
+  75: Compares TInt and TDouble.
+\item
+  76-77: Compares two TStr.
+\item
+  78: Compare TInt to TStr. This makes an ``arg-error''.
+\item
+  80-84 Frees objects.
+\end{itemize}
+
+\subsection{Compilation and execution}\label{compilation-and-execution}
+
+Change your current directory to src/tcomparable.
+
+\begin{lstlisting}
+$ cd src/tcomparable
+$ meson setup _build
+$ ninja -C _build
+\end{lstlisting}
+
+Then execute it.
+
+\begin{lstlisting}
+$ _build/tcomparable
+124 is greater than 123.450000.
+"one" is less than "two".
+"two" is greater than "three".
+
+TComparable: argument error.
+
+TComparable: argument error.
+
+TComparable: argument error.
+
+TComparable: argument error.
+
+TComparable: argument error.
+124 can't compare to "one".
+\end{lstlisting}
+
+\subsection{Build an interface without
+macros}\label{build-an-interface-without-macros}
+
+We used macros such as \passthrough{\lstinline!G\_DECLARE\_INTERFACE!},
+\passthrough{\lstinline!G\_DEFINE\_INTERFACE!} to build an interface.
+And \passthrough{\lstinline!G\_DEFINE\_TYPE\_WITH\_CODE!} to implement
+the interface. We can also build it without macros. There are three
+files in the \passthrough{\lstinline!tcomparable!} directory.
+
+\begin{itemize}
+\tightlist
+\item
+  \passthrough{\lstinline!tcomparable\_without\_macro.h!}
+\item
+  \passthrough{\lstinline!tcomparable\_without\_macro.c!}
+\item
+  \passthrough{\lstinline!tint\_without\_macro.c!}
+\end{itemize}
+
+They don't use macros. Instead, they register the interface or
+implementation of the interface to the type system directly. If you want
+to know that, see the source files in src/tcomparable.
+
+\subsection{GObject system and object oriented
+languages}\label{gobject-system-and-object-oriented-languages}
+
+If you know any object oriented languages, you probably have thought
+that GObject and the languages are similar. Learning such languages is
+very useful to know GObject system.

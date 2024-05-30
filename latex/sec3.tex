@@ -1,0 +1,848 @@
+\section{Type system and registration
+process}\label{type-system-and-registration-process}
+
+GObject is a base object. We don't usually use GObject itself. Because
+GObject is very simple and not enough to be used by itself in most
+situations. Instead, we use descendant objects of GObject such as many
+kinds of GtkWidget. We can rather say such derivability is the most
+important feature of GObject.
+
+This section describes how to define a child object of GObject.
+
+\subsection{Name convention}\label{name-convention}
+
+An example of this section is an object represents a real number. It is
+not so useful because we have already had double type in C language to
+represent real numbers. However, I think this example is not so bad to
+know the technique how to define a child object.
+
+First, you need to know the naming convention. An object name consists
+of name space and name. For example, ``GObject'' consists of a name
+space ``G'' and a name ``Object''. ``GtkWidget'' consists of a name
+space ``Gtk'' and a name ``Widget''. Let the name space be ``T'' and the
+name be ``Double'' of the new object. In this tutorial, we use ``T'' as
+a name space for all the objects we make.
+
+TDouble is the object name. It is a child object of GObject. It
+represents a real number and the type of the number is double. It has
+some useful functions.
+
+\subsection{Define TDoubleClass and
+TDouble}\label{define-tdoubleclass-and-tdouble}
+
+When we say ``type'', it can be the type in the type system or C
+language type. For example, GObject is a type name in the type system.
+And char, int or double is C language types. When the meaning of the
+word ``type'' is clear in the context, we just call it ``type''. But if
+it's ambiguous, we call it ``C type'' or ``type in the type system''.
+
+TDouble object has the class and instance. The C type of the class is
+TDoubleClass. Its structure is like this:
+
+\begin{lstlisting}[language=C]
+typedef struct _TDoubleClass TDoubleClass;
+struct _TDoubleClass {
+  GObjectClass parent_class;
+};
+\end{lstlisting}
+
+\_TDoubleClass is a C structure tag name and TDoubleClass is ``struct
+\_TDoubleClass''. TDoubleClass is a newly created C type.
+
+\begin{itemize}
+\tightlist
+\item
+  Use typedef to define a class type.
+\item
+  The first member of the structure must be the parent's class
+  structure.
+\end{itemize}
+
+TDoubleClass doesn't need its own member.
+
+The C type of the instance of TDouble is TDouble.
+
+\begin{lstlisting}[language=C]
+typedef struct _TDouble TDouble;
+struct _TDouble {
+  GObject parent;
+  double value;
+};
+\end{lstlisting}
+
+This is similar to the structure of the class.
+
+\begin{itemize}
+\tightlist
+\item
+  Use typedef to define an instance type.
+\item
+  The first member of the structure must be the parent's instance
+  structure.
+\end{itemize}
+
+TDouble has its own member, ``value''. It is the value of TDouble
+instance.
+
+The coding convention above needs to be kept all the time.
+
+\subsection{Creation process of a child of
+GObject}\label{creation-process-of-a-child-of-gobject}
+
+The creation process of TDouble type is similar to the one of GObject.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Registers TDouble type to the type system.
+\item
+  The type system allocates memory for TDoubleClass and TDouble.
+\item
+  Initializes TDoubleClass.
+\item
+  Initializes TDouble.
+\end{enumerate}
+
+\subsection{Registration}\label{registration}
+
+Usually registration is done by convenient macro such as
+\passthrough{\lstinline!G\_DECLARE\_FINAL\_TYPE!} and
+\passthrough{\lstinline!G\_DEFINE\_TYPE!}. You can use
+\passthrough{\lstinline!G\_DEFINE\_FINAL\_TYPE!} for a final type class
+instead of \passthrough{\lstinline!G\_DEFINE\_TYPE!} since GLib version
+2.70. So you don't need to care about registration details. But, in this
+tutorial, it is important to understand GObject type system, so I want
+to show you the registration without macro, first.
+
+There are two kinds of types, static and dynamic. Static type doesn't
+destroy its class even after all the instances have been destroyed.
+Dynamic type destroys its class when the last instance has been
+destroyed. The type of GObject is static and its descendant objects'
+type is also static. The function
+\passthrough{\lstinline!g\_type\_register\_static!} registers a type of
+a static object. The following code is extracted from
+\passthrough{\lstinline!gtype.h!} in the Glib source files.
+
+\begin{lstlisting}[language=C]
+GType
+g_type_register_static (GType           parent_type,
+                        const gchar     *type_name,
+                        const GTypeInfo *info,
+                        GTypeFlags      flags);
+\end{lstlisting}
+
+The parameters above are:
+
+\begin{itemize}
+\tightlist
+\item
+  parent\_type: Parent type.
+\item
+  type\_name: The name of the type. For example, ``TDouble''.
+\item
+  info: Information of the type. \passthrough{\lstinline!GTypeInfo!}
+  structure will be explained below.
+\item
+  flags: Flag. If the type is abstract type or abstract value type, then
+  set their flag. Otherwise, set it to zero.
+\end{itemize}
+
+Because the type system maintains the parent-child relationship of the
+type, \passthrough{\lstinline!g\_type\_register\_static!} has a parent
+type parameter. And the type system also keeps the information of the
+type. After the registration,
+\passthrough{\lstinline!g\_type\_register\_static!} returns the type of
+the new object.
+
+\passthrough{\lstinline!GTypeInfo!} structure is defined as follows.
+
+\begin{lstlisting}[language=C]
+typedef struct _GTypeInfo  GTypeInfo;
+
+struct _GTypeInfo
+{
+  /* interface types, classed types, instantiated types */
+  guint16                class_size;
+
+  GBaseInitFunc          base_init;
+  GBaseFinalizeFunc      base_finalize;
+
+  /* interface types, classed types, instantiated types */
+  GClassInitFunc         class_init;
+  GClassFinalizeFunc     class_finalize;
+  gconstpointer          class_data;
+
+  /* instantiated types */
+  guint16                instance_size;
+  guint16                n_preallocs;
+  GInstanceInitFunc      instance_init;
+
+  /* value handling */
+  const GTypeValueTable  *value_table;
+};
+\end{lstlisting}
+
+This structure needs to be created before the registration.
+
+\begin{itemize}
+\tightlist
+\item
+  class\_size: The size of the class. For example, TDouble's class size
+  is \passthrough{\lstinline!sizeof (TDoubleClass)!}.
+\item
+  base\_init, base\_finalize: These functions initialize/finalize the
+  dynamic members of the class. In many cases, they aren't necessary,
+  and are assigned NULL. For further information, see
+  \href{https://docs.gtk.org/gobject/callback.BaseInitFunc.html}{GObject
+  API Reference -- BaseInitFunc} and
+  \href{https://docs.gtk.org/gobject/callback.ClassInitFunc.html}{GObject
+  API Reference -- ClassInitFunc}.
+\item
+  class\_init: Initializes static members of the class. Assign your
+  class initialization function to \passthrough{\lstinline!class\_init!}
+  member. By convention, the name is
+  \passthrough{\lstinline!<name space>\_<name>\_class\_init!}, for
+  example, \passthrough{\lstinline!t\_double\_class\_init!}.
+\item
+  class\_finalize: Finalizes the class. Because descendant type of
+  GObjec is static, it doesn't have a finalize function. Assign NULL to
+  \passthrough{\lstinline!class\_finalize!} member.
+\item
+  class\_data: User-supplied data passed to the class init/finalize
+  functions. Usually NULL is assigned.
+\item
+  instance\_size: The size of the instance. For example, TDouble's
+  instance size is \passthrough{\lstinline!sizeof (TDouble)!}.
+\item
+  n\_preallocs: This is ignored. it has been used by the old version of
+  Glib.
+\item
+  instance\_init: Initializes instance members. Assign your instance
+  initialization function to \passthrough{\lstinline!instance\_init!}
+  member. By convention, the name is
+  \passthrough{\lstinline!<name space>\_<name>\_init!}, for example,
+  \passthrough{\lstinline!t\_double\_init!}.
+\item
+  value\_table: This is usually only useful for fundamental types. If
+  the type is descendant of GObject, assign NULL.
+\end{itemize}
+
+These information is kept by the type system and used when the object is
+created or destroyed. Class\_size and instance\_size are used to
+allocate memory for the class and instance. Class\_init and
+instance\_init functions are called when class or instance is
+initialized.
+
+The C program \passthrough{\lstinline!example3.c!} shows how to use
+\passthrough{\lstinline!g\_type\_register\_static!}.
+
+\begin{lstlisting}[language=C, numbers=left]
+#include <glib-object.h>
+
+#define T_TYPE_DOUBLE  (t_double_get_type ())
+
+typedef struct _TDouble TDouble;
+struct _TDouble {
+  GObject parent;
+  double value;
+};
+
+typedef struct _TDoubleClass TDoubleClass;
+struct _TDoubleClass {
+  GObjectClass parent_class;
+};
+
+static void
+t_double_class_init (TDoubleClass *class) {
+}
+
+static void
+t_double_init (TDouble *self) {
+}
+
+GType
+t_double_get_type (void) {
+  static GType type = 0;
+  GTypeInfo info;
+
+  if (type == 0) {
+    info.class_size = sizeof (TDoubleClass);
+    info.base_init = NULL;
+    info.base_finalize = NULL;
+    info.class_init = (GClassInitFunc)  t_double_class_init;
+    info.class_finalize = NULL;
+    info.class_data = NULL;
+    info.instance_size = sizeof (TDouble);
+    info.n_preallocs = 0;
+    info.instance_init = (GInstanceInitFunc)  t_double_init;
+    info.value_table = NULL;
+    type = g_type_register_static (G_TYPE_OBJECT, "TDouble", &info, 0);
+  }
+  return type;
+}
+
+int
+main (int argc, char **argv) {
+  GType dtype;
+  TDouble *d;
+
+  dtype = t_double_get_type (); /* or dtype = T_TYPE_DOUBLE */
+  if (dtype)
+    g_print ("Registration was a success. The type is %lx.\n", dtype);
+  else
+    g_print ("Registration failed.\n");
+
+  d = g_object_new (T_TYPE_DOUBLE, NULL);
+  if (d)
+    g_print ("Instantiation was a success. The instance address is %p.\n", d);
+  else
+    g_print ("Instantiation failed.\n");
+  g_object_unref (d); /* Releases the object d. */
+
+  return 0;
+}
+\end{lstlisting}
+
+\begin{itemize}
+\tightlist
+\item
+  16-22: A class initialization function and an instance initialization
+  function. The argument \passthrough{\lstinline!class!} points the
+  class structure and the argument \passthrough{\lstinline!self!} points
+  the instance structure. They do nothing here but they are necessary
+  for the registration.
+\item
+  24-43: \passthrough{\lstinline!t\_double\_get\_type!} function. This
+  function returns the type of the TDouble object. The name of a
+  function is always
+  \passthrough{\lstinline!<name space>\_<name>\_get\_type!}. And a macro
+  \passthrough{\lstinline!<NAME\_SPACE>\_TYPE\_<NAME>!} (all characters
+  are upper case) is replaced by this function. Look at line 3.
+  \passthrough{\lstinline!T\_TYPE\_DOUBLE!} is a macro replaced by
+  \passthrough{\lstinline!t\_double\_get\_type ()!}. This function has a
+  static variable \passthrough{\lstinline!type!} to keep the type of the
+  object. At the first call of this function,
+  \passthrough{\lstinline!type!} is zero. Then it calls
+  \passthrough{\lstinline!g\_type\_register\_static!} to register the
+  object to the type system. At the second or subsequent call, the
+  function just returns \passthrough{\lstinline!type!}, because the
+  static variable \passthrough{\lstinline!type!} has been assigned
+  non-zero value by \passthrough{\lstinline!g\_type\_register\_static!}
+  and it keeps the value.
+\item
+  30-40 : Sets \passthrough{\lstinline!info!} structure and calls
+  \passthrough{\lstinline!g\_type\_register\_static!}.
+\item
+  45-64: Main function. Gets the type of TDouble object and displays it.
+  The function \passthrough{\lstinline!g\_object\_new!} is used to
+  instantiate the object. The GObject API reference says that the
+  function returns a pointer to a GObject instance but it actually
+  returns a gpointer. Gpointer is the same as
+  \passthrough{\lstinline!void *!} and it can be assigned to a pointer
+  that points any type. So, the statement
+  \passthrough{\lstinline!d = g\_object\_new (T\_TYPE\_DOUBLE, NULL);!}
+  is correct. If the function \passthrough{\lstinline!g\_object\_new!}
+  returned \passthrough{\lstinline!GObject *!}, it would be necessary to
+  cast the returned pointer. After the creation, it shows the address of
+  the instance. Finally, the instance is released and destroyed with the
+  function \passthrough{\lstinline!g\_object\_unref!}.
+\end{itemize}
+
+\passthrough{\lstinline!example3.c!} is in the src/misc directory.
+
+Execute it.
+
+\begin{lstlisting}
+$ cd src/misc; _build/example3
+Registration was a success. The type is 56414f164880.
+Instantiation was a success. The instance address is 0x56414f167010.
+\end{lstlisting}
+
+\subsection{G\_DEFINE\_TYPE macro}\label{g_define_type-macro}
+
+The registration above is always done with the same algorithm.
+Therefore, it can be defined as a macro such as
+\passthrough{\lstinline!G\_DEFINE\_TYPE!}.
+
+\passthrough{\lstinline!G\_DEFINE\_TYPE!} does the following:
+
+\begin{itemize}
+\tightlist
+\item
+  Declares a class initialization function. Its name is
+  \passthrough{\lstinline!<name space>\_<name>\_class\_init!}. For
+  example, if the object name is \passthrough{\lstinline!TDouble!}, it
+  is \passthrough{\lstinline!t\_double\_class\_init!}. This is a
+  declaration, not a definition. You need to define it.
+\item
+  Declares a instance initialization function. Its name is
+  \passthrough{\lstinline!<name space>\_<name>\_init!}. For example, if
+  the object name is \passthrough{\lstinline!TDouble!}, it is
+  \passthrough{\lstinline!t\_double\_init!}. This is a declaration, not
+  a definition. You need to define it.
+\item
+  Defines a static variable pointing to the parent class. Its name is
+  \passthrough{\lstinline!<name space>\_<name>\_parent\_class!}. For
+  example, if the object name is \passthrough{\lstinline!TDouble!}, it
+  is \passthrough{\lstinline!t\_double\_parent\_class!}.
+\item
+  Defines a \passthrough{\lstinline!<name space>\_<name>\_get\_type ()!}
+  function. For example, if the object name is
+  \passthrough{\lstinline!TDouble!}, it is
+  \passthrough{\lstinline!t\_double\_get\_type!}. The registration is
+  done in this function like the previous subsection.
+\end{itemize}
+
+Using this macro reduces lines of the program. See the following sample
+\passthrough{\lstinline!example4.c!} which works the same as
+\passthrough{\lstinline!example3.c!}.
+
+\begin{lstlisting}[language=C, numbers=left]
+#include <glib-object.h>
+
+#define T_TYPE_DOUBLE  (t_double_get_type ())
+
+typedef struct _TDouble TDouble;
+struct _TDouble {
+  GObject parent;
+  double value;
+};
+
+typedef struct _TDoubleClass TDoubleClass;
+struct _TDoubleClass {
+  GObjectClass parent_class;
+};
+
+G_DEFINE_TYPE (TDouble, t_double, G_TYPE_OBJECT)
+
+static void
+t_double_class_init (TDoubleClass *class) {
+}
+
+static void
+t_double_init (TDouble *self) {
+}
+
+int
+main (int argc, char **argv) {
+  GType dtype;
+  TDouble *d;
+
+  dtype = t_double_get_type (); /* or dtype = T_TYPE_DOUBLE */
+  if (dtype)
+    g_print ("Registration was a success. The type is %lx.\n", dtype);
+  else
+    g_print ("Registration failed.\n");
+
+  d = g_object_new (T_TYPE_DOUBLE, NULL);
+  if (d)
+    g_print ("Instantiation was a success. The instance address is %p.\n", d);
+  else
+    g_print ("Instantiation failed.\n");
+  g_object_unref (d);
+
+  return 0;
+}
+\end{lstlisting}
+
+Thanks to \passthrough{\lstinline!G\_DEFINE\_TYPE!}, we are freed from
+writing bothersome code like \passthrough{\lstinline!GTypeInfo!} and
+\passthrough{\lstinline!g\_type\_register\_static!}. One important thing
+to be careful is to follow the convention of the naming of init
+functions.
+
+Execute it.
+
+\begin{lstlisting}
+$ cd src/misc; _build/example4
+Registration was a success. The type is 564b4ff708a0.
+Instantiation was a success. The instance address is 0x564b4ff71400.
+\end{lstlisting}
+
+You can use \passthrough{\lstinline!G\_DEFINE\_FINAL\_TYPE!} instead of
+\passthrough{\lstinline!G\_DEFINE\_TYPE!} for final type classes since
+GLib version 2.70.
+
+\subsection{G\_DECLARE\_FINAL\_TYPE
+macro}\label{g_declare_final_type-macro}
+
+Another useful macro is
+\passthrough{\lstinline!G\_DECLARE\_FINAL\_TYPE!} macro. This macro can
+be used for a final type. A final type doesn't have any children. If a
+type has children, it is a derivable type. If you want to define a
+derivable type object, use
+\passthrough{\lstinline!G\_DECLARE\_DERIVABLE\_TYPE!} instead. However,
+you probably want to write final type objects in most cases.
+
+\passthrough{\lstinline!G\_DECLARE\_FINAL\_TYPE!} does the following:
+
+\begin{itemize}
+\tightlist
+\item
+  Declares \passthrough{\lstinline!<name space>\_<name>\_get\_type ()!}
+  function. This is only declaration. You need to define it. But you can
+  use \passthrough{\lstinline!G\_DEFINE\_TYPE!}, its expansion includes
+  the definition of the function. So, you actually don't need to write
+  the definition by yourself.
+\item
+  The C type of the object is defined as a typedef of structure. For
+  example, if the object name is \passthrough{\lstinline!TDouble!}, then
+  \passthrough{\lstinline!typedef struct \_TDouble TDouble!} is included
+  in the expansion. But you need to define the structure
+  \passthrough{\lstinline!struct \_TDouble!} by yourself before
+  \passthrough{\lstinline!G\_DEFINE\_TYPE!}.
+\item
+  \passthrough{\lstinline!<NAME SPACE>\_<NAME>!} macro is defined. For
+  example, if the object is \passthrough{\lstinline!TDouble!} the macro
+  is \passthrough{\lstinline!T\_DOUBLE!}. It will be expanded to a
+  function which casts the argument to the pointer to the object. For
+  example, \passthrough{\lstinline!T\_DOUBLE (obj)!} casts the type of
+  \passthrough{\lstinline!obj!} to \passthrough{\lstinline!TDouble *!}.
+\item
+  \passthrough{\lstinline!<NAME SPACE>\_IS\_<NAME>!} macro is defined.
+  For example, if the object is \passthrough{\lstinline!TDouble!} the
+  macro is \passthrough{\lstinline!T\_IS\_DOUBLE!}. It will be expanded
+  to a function which checks if the argument points the instance of
+  \passthrough{\lstinline!TDouble!}. It returns true if the argument
+  points a descendant of \passthrough{\lstinline!TDouble!}.
+\item
+  The class structure is defined. A final type object doesn't need to
+  have its own member of class structure. The definition is like the
+  line 11 to 14 in the \passthrough{\lstinline!example4.c!}.
+\end{itemize}
+
+You need to write the macro definition of the type of the object before
+\passthrough{\lstinline!G\_DECLARE\_FINAL\_TYPE!}. For example, if the
+object is \passthrough{\lstinline!TDouble!}, then
+
+\begin{lstlisting}[language=C]
+#define T_TYPE_DOUBLE  (t_double_get_type ())
+\end{lstlisting}
+
+needs to be defined before
+\passthrough{\lstinline!G\_DECLARE\_FINAL\_TYPE!}.
+
+The C file \passthrough{\lstinline!example5.c!} uses this macro. It
+works like \passthrough{\lstinline!example3.c!} or
+\passthrough{\lstinline!example4.c!}.
+
+\begin{lstlisting}[language=C, numbers=left]
+#include <glib-object.h>
+
+#define T_TYPE_DOUBLE  (t_double_get_type ())
+G_DECLARE_FINAL_TYPE (TDouble, t_double, T, DOUBLE, GObject)
+
+struct _TDouble {
+  GObject parent;
+  double value;
+};
+
+G_DEFINE_TYPE (TDouble, t_double, G_TYPE_OBJECT)
+
+static void
+t_double_class_init (TDoubleClass *class) {
+}
+
+static void
+t_double_init (TDouble *self) {
+}
+
+int
+main (int argc, char **argv) {
+  GType dtype;
+  TDouble *d;
+
+  dtype = t_double_get_type (); /* or dtype = T_TYPE_DOUBLE */
+  if (dtype)
+    g_print ("Registration was a success. The type is %lx.\n", dtype);
+  else
+    g_print ("Registration failed.\n");
+
+  d = g_object_new (T_TYPE_DOUBLE, NULL);
+  if (d)
+    g_print ("Instantiation was a success. The instance address is %p.\n", d);
+  else
+    g_print ("Instantiation failed.\n");
+
+  if (T_IS_DOUBLE (d))
+    g_print ("d is TDouble instance.\n");
+  else
+    g_print ("d is not TDouble instance.\n");
+
+  if (G_IS_OBJECT (d))
+    g_print ("d is GObject instance.\n");
+  else
+    g_print ("d is not GObject instance.\n");
+  g_object_unref (d);
+
+  return 0;
+}
+\end{lstlisting}
+
+Execute it.
+
+\begin{lstlisting}
+$ cd src/misc; _build/example5
+Registration was a success. The type is 5560b4cf58a0.
+Instantiation was a success. The instance address is 0x5560b4cf6400.
+d is TDouble instance.
+d is GObject instance.
+\end{lstlisting}
+
+\subsection{Separate the file into main.c, tdouble.h and
+tdouble.c}\label{separate-the-file-into-main.c-tdouble.h-and-tdouble.c}
+
+Now it's time to separate the contents into three files,
+\passthrough{\lstinline!main.c!}, \passthrough{\lstinline!tdouble.h!}
+and \passthrough{\lstinline!tdouble.c!}. An object is defined by two
+files, a header file and C source file.
+
+tdouble.h
+
+\begin{lstlisting}[language=C, numbers=left]
+#pragma once
+
+#include <glib-object.h>
+
+#define T_TYPE_DOUBLE  (t_double_get_type ())
+G_DECLARE_FINAL_TYPE (TDouble, t_double, T, DOUBLE, GObject)
+
+gboolean
+t_double_get_value (TDouble *self, double *value);
+
+void
+t_double_set_value (TDouble *self, double value);
+
+TDouble *
+t_double_new (double value);
+\end{lstlisting}
+
+\begin{itemize}
+\tightlist
+\item
+  Header files are public, i.e.~it is open to any files. Header files
+  include macros, which gives type information, cast and type check, and
+  public functions.
+\item
+  1: The directive \passthrough{\lstinline!\#pragma once!} prevent the
+  compiler from reading the header file two times or more. It is not
+  officially defined but is supported widely in many compilers.
+\item
+  5-6: \passthrough{\lstinline!T\_TYPE\_DOUBLE!} is public.
+  \passthrough{\lstinline!G\_DECLARE\_FINAL\_TYPE!} is expanded to
+  public definitions.
+\item
+  8-12: Public function declarations. They are getter and setter of the
+  value of the object. They are called ``instance methods'', which are
+  used in object-oriented languages.
+\item
+  14-15: Object instantiation function.
+\end{itemize}
+
+tdouble.c
+
+\begin{lstlisting}[language=C, numbers=left]
+#include "tdouble.h"
+
+struct _TDouble {
+  GObject parent;
+  double value;
+};
+
+G_DEFINE_TYPE (TDouble, t_double, G_TYPE_OBJECT)
+
+static void
+t_double_class_init (TDoubleClass *class) {
+}
+
+static void
+t_double_init (TDouble *self) {
+}
+
+gboolean
+t_double_get_value (TDouble *self, double *value) {
+  g_return_val_if_fail (T_IS_DOUBLE (self), FALSE);
+
+  *value = self->value;
+  return TRUE;
+}
+
+void
+t_double_set_value (TDouble *self, double value) {
+  g_return_if_fail (T_IS_DOUBLE (self));
+
+  self->value = value;
+}
+
+TDouble *
+t_double_new (double value) {
+  TDouble *d;
+
+  d = g_object_new (T_TYPE_DOUBLE, NULL);
+  d->value = value;
+  return d;
+}
+\end{lstlisting}
+
+\begin{itemize}
+\tightlist
+\item
+  3-6: Declaration of the instance structure. Since
+  \passthrough{\lstinline!G\_DECLARE\_FINAL\_TYPE!} macro emits
+  \passthrough{\lstinline!typedef struct \_TDouble TDouble!}, the tag
+  name of the structure must be \passthrough{\lstinline!\_TDouble!}.
+\item
+  8: \passthrough{\lstinline!G\_DEFINE\_TYPE!} macro.
+\item
+  10-16: class and instance initialization functions. At present, they
+  don't do anything.
+\item
+  18-24: Getter. The argument \passthrough{\lstinline!value!} is the
+  pointer to a double type variable. Assigns the object value
+  (\passthrough{\lstinline!self->value!}) to the variable. If it
+  succeeds, it returns TRUE. The function
+  \passthrough{\lstinline!g\_return\_val\_if\_fail!} is used to check
+  the argument type. If the argument \passthrough{\lstinline!self!} is
+  not TDouble type, it outputs error to the log and immediately returns
+  FALSE. This function is used to report a programmer's error. You
+  shouldn't use it for a runtime error. See
+  \href{https://docs.gtk.org/glib/error-reporting.html}{Glib API
+  Reference -- Error Reporting} for further information. The function
+  \passthrough{\lstinline!g\_return\_val\_if\_fail!} isn't used in
+  static class functions, which are private, because static functions
+  are called only from functions in the same file and the caller knows
+  the type of parameters.
+\item
+  26-31: Setter. The function
+  \passthrough{\lstinline!g\_return\_if\_fail!} is used to check the
+  argument type. This function doesn't return any value. Because the
+  type of \passthrough{\lstinline!t\_double\_set\_value!} is
+  \passthrough{\lstinline!void!} so no value will be returned.
+  Therefore, we use \passthrough{\lstinline!g\_return\_if\_fail!}
+  instead of \passthrough{\lstinline!g\_return\_val\_if\_fail!}.
+\item
+  33-40: Object instantiation function. It has one parameter
+  \passthrough{\lstinline!value!} to set the value of the object.
+\item
+  37: This function uses \passthrough{\lstinline!g\_object\_new!} to
+  instantiate the object. The argument
+  \passthrough{\lstinline!T\_TYPE\_DOUBLE!} is expanded to a function
+  \passthrough{\lstinline!t\_double\_get\_type ()!}. If this is the
+  first call for \passthrough{\lstinline!t\_double\_get\_type!}, the
+  type registration will be carried out.
+\end{itemize}
+
+main.c
+
+\begin{lstlisting}[language=C, numbers=left]
+#include <glib-object.h>
+#include "tdouble.h"
+
+int
+main (int argc, char **argv) {
+  TDouble *d;
+  double value;
+
+  d = t_double_new (10.0);
+  if (t_double_get_value (d, &value))
+    g_print ("t_double_get_value succesfully assigned %lf to value.\n", value);
+  else
+    g_print ("t_double_get_value failed.\n");
+
+  t_double_set_value (d, -20.0);
+  g_print ("Now, set d (tDouble object) with %lf.\n", -20.0);
+  if (t_double_get_value (d, &value))
+    g_print ("t_double_get_value succesfully assigned %lf to value.\n", value);
+  else
+    g_print ("t_double_get_value failed.\n");
+  g_object_unref (d);
+
+  return 0;
+}
+\end{lstlisting}
+
+\begin{itemize}
+\tightlist
+\item
+  2: Includes \passthrough{\lstinline!tdouble.h!}. This is necessary for
+  accessing TDouble object.
+\item
+  9: Instantiate TDouble object and set \passthrough{\lstinline!d!} to
+  point the object.
+\item
+  10-13: Tests the getter of the object.
+\item
+  15-20: Tests the setter of the object.
+\item
+  21: Releases the instance \passthrough{\lstinline!d!}.
+\end{itemize}
+
+The source files are located in src/tdouble1. Change your current
+directory to the directory above and type the following.
+
+\begin{lstlisting}
+$ cd src/tdouble1
+$ meson setup _build
+$ ninja -C _build
+\end{lstlisting}
+
+Then, execute the program.
+
+\begin{lstlisting}
+$ cd src/tdouble1; _build/example6
+t_double_get_value succesfully assigned 10.000000 to value.
+Now, set d (tDouble object) with -20.000000.
+t_double_get_value succesfully assigned -20.000000 to value.
+\end{lstlisting}
+
+This example is very simple. But any object has header file and C source
+file like this. And they follow the convention. You probably aware of
+the importance of the convention. For the further information refer to
+\href{https://docs.gtk.org/gobject/concepts.html\#conventions}{GObject
+API Reference -- Conventions}.
+
+\subsection{Functions}\label{functions}
+
+Functions of objects are open to other objects. They are like public
+methods in object oriented languages. They are actually called
+``instance method'' in the GObject API Reference.
+
+It is natural to add calculation operators to TDouble objects because
+they represent real numbers. For example,
+\passthrough{\lstinline!t\_double\_add!} adds the value of the instance
+and another instance. Then it creates a new TDouble instance which has a
+value of the sum of them.
+
+\begin{lstlisting}[language=C]
+TDouble *
+t_double_add (TDouble *self, TDouble *other) {
+  g_return_val_if_fail (T_IS_DOUBLE (self), NULL);
+  g_return_val_if_fail (T_IS_DOUBLE (other), NULL);
+  double value;
+
+  if (! t_double_get_value (other, &value))
+    return NULL;
+  return t_double_new (self->value + value);
+}
+\end{lstlisting}
+
+The first argument \passthrough{\lstinline!self!} is the instance the
+function belongs to. The second argument \passthrough{\lstinline!other!}
+is another TDouble instance.
+
+The value of \passthrough{\lstinline!self!} can be accessed by
+\passthrough{\lstinline!self->value!}, but don't use
+\passthrough{\lstinline!other->value!} to get the value of
+\passthrough{\lstinline!other!}. Use a function
+\passthrough{\lstinline!t\_double\_get\_value!} instead. Because
+\passthrough{\lstinline!self!} is an instance out of
+\passthrough{\lstinline!other!}. Generally, the structure of an object
+isn't open to other objects. When an object A access to another object
+B, A must use a public function provided by B.
+
+\subsection{Exercise}\label{exercise}
+
+Write functions of TDouble object for subtraction, multiplication,
+division and sign changing (unary minus). Compare your program to
+\passthrough{\lstinline!tdouble.c!} in src/tdouble2 directory.
