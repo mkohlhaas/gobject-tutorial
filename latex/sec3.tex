@@ -240,67 +240,76 @@ The C program \passthrough{\lstinline!example3.c!} shows how to use
 \begin{lstlisting}[language=C, numbers=left]
 #include <glib-object.h>
 
-#define T_TYPE_DOUBLE  (t_double_get_type ())
-
-typedef struct _TDouble TDouble;
-struct _TDouble {
+typedef struct _TDouble
+{
   GObject parent;
-  double value;
-};
+  double  value;
+} TDouble;
 
-typedef struct _TDoubleClass TDoubleClass;
-struct _TDoubleClass {
-  GObjectClass parent_class;
-};
+typedef struct _TDoubleClass
+{
+  GObjectClass parent;
+} TDoubleClass;
 
 static void
-t_double_class_init (TDoubleClass *class) {
+t_double_class_init (TDoubleClass *class)
+{
 }
 
 static void
-t_double_init (TDouble *self) {
+t_double_init (TDouble *self)
+{
 }
 
 GType
-t_double_get_type (void) {
-  static GType type = 0;
-  GTypeInfo info;
+t_double_get_type (void)
+{
+  static GType type;
 
-  if (type == 0) {
-    info.class_size = sizeof (TDoubleClass);
-    info.base_init = NULL;
-    info.base_finalize = NULL;
-    info.class_init = (GClassInitFunc)  t_double_class_init;
-    info.class_finalize = NULL;
-    info.class_data = NULL;
-    info.instance_size = sizeof (TDouble);
-    info.n_preallocs = 0;
-    info.instance_init = (GInstanceInitFunc)  t_double_init;
-    info.value_table = NULL;
-    type = g_type_register_static (G_TYPE_OBJECT, "TDouble", &info, 0);
-  }
+  if (!type)
+    {
+      GTypeInfo info = {
+        .class_size    = sizeof (TDoubleClass),
+        .class_init    = (GClassInitFunc)t_double_class_init,
+        .instance_size = sizeof (TDouble),
+        .instance_init = (GInstanceInitFunc)t_double_init,
+      };
+      type = g_type_register_static (G_TYPE_OBJECT, "TDouble", &info, G_TYPE_FLAG_NONE);
+    }
   return type;
 }
 
+#define T_DOUBLE_TYPE (t_double_get_type ())
+
 int
-main (int argc, char **argv) {
-  GType dtype;
-  TDouble *d;
+main (void)
+{
+  GType dtype = T_DOUBLE_TYPE;
 
-  dtype = t_double_get_type (); /* or dtype = T_TYPE_DOUBLE */
   if (dtype)
-    g_print ("Registration was a success. The type is %lx.\n", dtype);
+    {
+      g_print ("Type registration was successful!\n");
+      g_print ("The type ID is %lx.\n", dtype);
+    }
   else
-    g_print ("Registration failed.\n");
+    {
+      g_print ("Type registration failed.\n");
+      exit (EXIT_FAILURE);
+    }
 
-  d = g_object_new (T_TYPE_DOUBLE, NULL);
+  TDouble *d = g_object_new (T_DOUBLE_TYPE, NULL);
   if (d)
-    g_print ("Instantiation was a success. The instance address is %p.\n", d);
+    {
+      g_print ("Instantiation was successful!\n");
+      g_print ("The instance address is %p.\n", d);
+    }
   else
-    g_print ("Instantiation failed.\n");
-  g_object_unref (d); /* Releases the object d. */
+    {
+      g_print ("Instantiation failed.\n");
+      exit (EXIT_FAILURE);
+    }
 
-  return 0;
+  g_object_unref (d);
 }
 \end{lstlisting}
 
@@ -400,49 +409,63 @@ Using this macro reduces lines of the program. See the following sample
 
 \begin{lstlisting}[language=C, numbers=left]
 #include <glib-object.h>
+#include <stdlib.h>
 
-#define T_TYPE_DOUBLE  (t_double_get_type ())
-
-typedef struct _TDouble TDouble;
-struct _TDouble {
+typedef struct _TDouble
+{
   GObject parent;
-  double value;
-};
+  double  value;
+} TDouble;
 
-typedef struct _TDoubleClass TDoubleClass;
-struct _TDoubleClass {
+typedef struct _TDoubleClass
+{
   GObjectClass parent_class;
-};
+} TDoubleClass;
 
+static void
+t_double_class_init (TDoubleClass *class)
+{
+}
+
+static void
+t_double_init (TDouble *self)
+{
+}
+
+// creates t_double_get_type, …
 G_DEFINE_TYPE (TDouble, t_double, G_TYPE_OBJECT)
 
-static void
-t_double_class_init (TDoubleClass *class) {
-}
-
-static void
-t_double_init (TDouble *self) {
-}
+#define T_DOUBLE_TYPE (t_double_get_type ())
 
 int
-main (int argc, char **argv) {
-  GType dtype;
-  TDouble *d;
+main (void)
+{
+  GType dtype = T_DOUBLE_TYPE;
 
-  dtype = t_double_get_type (); /* or dtype = T_TYPE_DOUBLE */
   if (dtype)
-    g_print ("Registration was a success. The type is %lx.\n", dtype);
+    {
+      g_print ("Type registration was successful!\n");
+      g_print ("The type ID is %lx.\n", dtype);
+    }
   else
-    g_print ("Registration failed.\n");
+    {
+      g_print ("Type registration failed.\n");
+      exit (EXIT_FAILURE);
+    }
 
-  d = g_object_new (T_TYPE_DOUBLE, NULL);
+  TDouble *d = g_object_new (T_DOUBLE_TYPE, NULL);
   if (d)
-    g_print ("Instantiation was a success. The instance address is %p.\n", d);
+    {
+      g_print ("Instantiation was successful!\n");
+      g_print ("The instance address is %p.\n", d);
+    }
   else
-    g_print ("Instantiation failed.\n");
-  g_object_unref (d);
+    {
+      g_print ("Instantiation failed.\n");
+      exit (EXIT_FAILURE);
+    }
 
-  return 0;
+  g_object_unref (d);
 }
 \end{lstlisting}
 
@@ -530,53 +553,78 @@ works like \passthrough{\lstinline!example3.c!} or
 \begin{lstlisting}[language=C, numbers=left]
 #include <glib-object.h>
 
-#define T_TYPE_DOUBLE  (t_double_get_type ())
-G_DECLARE_FINAL_TYPE (TDouble, t_double, T, DOUBLE, GObject)
-
-struct _TDouble {
+struct _TDouble
+{
   GObject parent;
-  double value;
+  double  value;
 };
 
-G_DEFINE_TYPE (TDouble, t_double, G_TYPE_OBJECT)
+// creates TDouble, TDoubleClass, T_IS_DOUBLE, …
+G_DECLARE_FINAL_TYPE (TDouble, t_double, T, DOUBLE, GObject)
+
+// creates t_double_get_type, …
+// G_DEFINE_TYPE (TDouble, t_double, G_TYPE_OBJECT)
+G_DEFINE_FINAL_TYPE (TDouble, t_double, G_TYPE_OBJECT)
 
 static void
-t_double_class_init (TDoubleClass *class) {
+t_double_class_init (TDoubleClass *class)
+{
 }
 
 static void
-t_double_init (TDouble *self) {
+t_double_init (TDouble *self)
+{
 }
+
+#define T_DOUBLE_TYPE (t_double_get_type ())
 
 int
-main (int argc, char **argv) {
-  GType dtype;
-  TDouble *d;
+main (void)
+{
+  GType dtype = T_DOUBLE_TYPE;
 
-  dtype = t_double_get_type (); /* or dtype = T_TYPE_DOUBLE */
   if (dtype)
-    g_print ("Registration was a success. The type is %lx.\n", dtype);
+    {
+      g_print ("Type registration was successful.\n");
+      g_print ("The type ID is %lx.\n", dtype);
+    }
   else
-    g_print ("Registration failed.\n");
+    {
+      g_print ("Type registration failed.\n");
+      exit (EXIT_FAILURE);
+    }
 
-  d = g_object_new (T_TYPE_DOUBLE, NULL);
+  TDouble *d = g_object_new (T_DOUBLE_TYPE, NULL);
   if (d)
-    g_print ("Instantiation was a success. The instance address is %p.\n", d);
+    {
+      g_print ("Instantiation was successful.\n");
+      g_print ("The instance address is %p.\n", d);
+    }
   else
-    g_print ("Instantiation failed.\n");
+    {
+      g_print ("Instantiation failed!\n");
+      exit (EXIT_FAILURE);
+    }
 
   if (T_IS_DOUBLE (d))
-    g_print ("d is TDouble instance.\n");
+    {
+      g_print ("d is a TDouble instance.\n");
+    }
   else
-    g_print ("d is not TDouble instance.\n");
+    {
+      g_print ("d is not a TDouble instance.\n");
+    }
 
   if (G_IS_OBJECT (d))
-    g_print ("d is GObject instance.\n");
+    {
+      g_print ("d is a GObject instance.\n");
+    }
   else
-    g_print ("d is not GObject instance.\n");
-  g_object_unref (d);
+    {
+      g_print ("d is not a GObject instance.\n");
+    }
 
-  return 0;
+  g_object_unref (d);
 }
 \end{lstlisting}
 
@@ -605,17 +653,11 @@ tdouble.h
 
 #include <glib-object.h>
 
-#define T_TYPE_DOUBLE  (t_double_get_type ())
 G_DECLARE_FINAL_TYPE (TDouble, t_double, T, DOUBLE, GObject)
 
-gboolean
-t_double_get_value (TDouble *self, double *value);
-
-void
-t_double_set_value (TDouble *self, double value);
-
-TDouble *
-t_double_new (double value);
+gboolean t_double_get_value (TDouble *self, double *value);
+void     t_double_set_value (TDouble *self, double value);
+TDouble *t_double_new (double value);
 \end{lstlisting}
 
 \begin{itemize}
@@ -645,23 +687,29 @@ tdouble.c
 \begin{lstlisting}[language=C, numbers=left]
 #include "tdouble.h"
 
-struct _TDouble {
+#define T_DOUBLE_TYPE (t_double_get_type ())
+
+struct _TDouble
+{
   GObject parent;
-  double value;
+  double  value;
 };
 
 G_DEFINE_TYPE (TDouble, t_double, G_TYPE_OBJECT)
 
 static void
-t_double_class_init (TDoubleClass *class) {
+t_double_class_init (TDoubleClass *class)
+{
 }
 
 static void
-t_double_init (TDouble *self) {
+t_double_init (TDouble *self)
+{
 }
 
 gboolean
-t_double_get_value (TDouble *self, double *value) {
+t_double_get_value (TDouble *self, double *value)
+{
   g_return_val_if_fail (T_IS_DOUBLE (self), FALSE);
 
   *value = self->value;
@@ -669,18 +717,18 @@ t_double_get_value (TDouble *self, double *value) {
 }
 
 void
-t_double_set_value (TDouble *self, double value) {
+t_double_set_value (TDouble *self, double value)
+{
   g_return_if_fail (T_IS_DOUBLE (self));
 
   self->value = value;
 }
 
 TDouble *
-t_double_new (double value) {
-  TDouble *d;
-
-  d = g_object_new (T_TYPE_DOUBLE, NULL);
-  d->value = value;
+t_double_new (double value)
+{
+  TDouble *d = g_object_new (T_DOUBLE_TYPE, NULL);
+  d->value   = value;
   return d;
 }
 \end{lstlisting}
@@ -736,29 +784,41 @@ t_double_new (double value) {
 main.c
 
 \begin{lstlisting}[language=C, numbers=left]
-#include <glib-object.h>
 #include "tdouble.h"
+#include <stdlib.h>
 
 int
-main (int argc, char **argv) {
-  TDouble *d;
+main (void)
+{
   double value;
+  double initial_val = 10.0;
+  double updated_val = -20.0;
 
-  d = t_double_new (10.0);
+  g_print ("Initialising d to %.2f.\n", initial_val);
+  TDouble *d = t_double_new (initial_val);
   if (t_double_get_value (d, &value))
-    g_print ("t_double_get_value succesfully assigned %lf to value.\n", value);
+    {
+      g_print ("Succesfully read value from d and assigned its value %.2f to another variable.\n", value);
+    }
   else
-    g_print ("t_double_get_value failed.\n");
+    {
+      g_print ("t_double_get_value call failed.\n");
+      exit (EXIT_FAILURE);
+    }
 
-  t_double_set_value (d, -20.0);
-  g_print ("Now, set d (tDouble object) with %lf.\n", -20.0);
+  t_double_set_value (d, updated_val);
+  g_print ("Setting d to %.2f.\n", updated_val);
   if (t_double_get_value (d, &value))
-    g_print ("t_double_get_value succesfully assigned %lf to value.\n", value);
+    {
+      g_print ("Succesfully read value from d and assigned its value %.2f to another variable.\n", value);
+    }
   else
-    g_print ("t_double_get_value failed.\n");
+    {
+      g_print ("t_double_get_value call failed.\n");
+      exit (EXIT_FAILURE);
+    }
+
   g_object_unref (d);
-
-  return 0;
 }
 \end{lstlisting}
 

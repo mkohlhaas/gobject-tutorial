@@ -841,11 +841,11 @@ The source files are located under src/tnumber. The file
 process, is as follows.
 
 \begin{lstlisting}[numbers=left]
-project ('tnumber', 'c')
+project('tnumber', 'c')
 
 gobjdep = dependency('gobject-2.0')
 
-sourcefiles = files('main.c', 'tnumber.c', 'tint.c', 'tdouble.c')
+sourcefiles = files('main.c', 'tdouble.c' 'tint.c', 'tnumber.c',)
 
 executable('tnumber', sourcefiles, dependencies: gobjdep, install: false)
 \end{lstlisting}

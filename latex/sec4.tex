@@ -253,36 +253,17 @@ tdouble.h
 
 #include <glib-object.h>
 
-#define T_TYPE_DOUBLE  (t_double_get_type ())
 G_DECLARE_FINAL_TYPE (TDouble, t_double, T, DOUBLE, GObject)
 
 /* getter and setter */
-gboolean
-t_double_get_value (TDouble *self, double *value);
-
-void
-t_double_set_value (TDouble *self, double value);
-
-/* arithmetic operator */
-/* These operators create a new instance and return a pointer to it. */
-TDouble *
-t_double_add (TDouble *self, TDouble *other);
-
-TDouble *
-t_double_sub (TDouble *self, TDouble *other);
-
-TDouble *
-t_double_mul (TDouble *self, TDouble *other);
-
-TDouble *
-t_double_div (TDouble *self, TDouble *other);
-
-TDouble *
-t_double_uminus (TDouble *self);
-
-/* create a new TDouble instance */
-TDouble *
-t_double_new (double value);
+gboolean t_double_get_value (TDouble *self, double *value);
+void     t_double_set_value (TDouble *self, double value);
+TDouble *t_double_add (TDouble *self, TDouble *other);
+TDouble *t_double_sub (TDouble *self, TDouble *other);
+TDouble *t_double_mul (TDouble *self, TDouble *other);
+TDouble *t_double_div (TDouble *self, TDouble *other);
+TDouble *t_double_uminus (TDouble *self);
+TDouble *t_double_new (double value);
 \end{lstlisting}
 
 tdouble.c
@@ -290,36 +271,35 @@ tdouble.c
 \begin{lstlisting}[language=C, numbers=left]
 #include "tdouble.h"
 
+#define T_TYPE_DOUBLE (t_double_get_type ())
+
 static guint t_double_signal;
 
-struct _TDouble {
+struct _TDouble
+{
   GObject parent;
-  double value;
+  double  value;
 };
 
 G_DEFINE_TYPE (TDouble, t_double, G_TYPE_OBJECT)
 
 static void
-t_double_class_init (TDoubleClass *class) {
-  t_double_signal = g_signal_new ("div-by-zero",
-                                 G_TYPE_FROM_CLASS (class),
-                                 G_SIGNAL_RUN_LAST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
-                                 0 /* class offset.Subclass cannot override the class handler (default handler). */,
-                                 NULL /* accumulator */,
-                                 NULL /* accumulator data */,
-                                 NULL /* C marshaller. g_cclosure_marshal_generic() will be used */,
-                                 G_TYPE_NONE /* return_type */,
-                                 0     /* n_params */
-                                 );
+t_double_class_init (TDoubleClass *class)
+{
+  GSignalFlags signal_flags = G_SIGNAL_RUN_LAST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS;
+  t_double_signal
+      = g_signal_new ("div-by-zero", G_TYPE_FROM_CLASS (class), signal_flags, 0, NULL, NULL, NULL, G_TYPE_NONE, 0);
 }
 
 static void
-t_double_init (TDouble *self) {
+t_double_init (TDouble *self)
+{
 }
 
 /* getter and setter */
 gboolean
-t_double_get_value (TDouble *self, double *value) {
+t_double_get_value (TDouble *self, double *value)
+{
   g_return_val_if_fail (T_IS_DOUBLE (self), FALSE);
 
   *value = self->value;
@@ -327,7 +307,8 @@ t_double_get_value (TDouble *self, double *value) {
 }
 
 void
-t_double_set_value (TDouble *self, double value) {
+t_double_set_value (TDouble *self, double value)
+{
   g_return_if_fail (T_IS_DOUBLE (self));
 
   self->value = value;
@@ -335,13 +316,14 @@ t_double_set_value (TDouble *self, double value) {
 
 /* arithmetic operator */
 /* These operators create a new instance and return a pointer to it. */
-#define t_double_binary_op(op) \
-  if (! t_double_get_value (other, &value)) \
-    return NULL; \
+#define t_double_binary_op(op)                                                                                         \
+  if (!t_double_get_value (other, &value))                                                                             \
+    return NULL;                                                                                                       \
   return t_double_new (self->value op value);
 
 TDouble *
-t_double_add (TDouble *self, TDouble *other) {
+t_double_add (TDouble *self, TDouble *other)
+{
   g_return_val_if_fail (T_IS_DOUBLE (self), NULL);
   g_return_val_if_fail (T_IS_DOUBLE (other), NULL);
   double value;
@@ -350,7 +332,8 @@ t_double_add (TDouble *self, TDouble *other) {
 }
 
 TDouble *
-t_double_sub (TDouble *self, TDouble *other) {
+t_double_sub (TDouble *self, TDouble *other)
+{
   g_return_val_if_fail (T_IS_DOUBLE (self), NULL);
   g_return_val_if_fail (T_IS_DOUBLE (other), NULL);
   double value;
@@ -359,7 +342,8 @@ t_double_sub (TDouble *self, TDouble *other) {
 }
 
 TDouble *
-t_double_mul (TDouble *self, TDouble *other) {
+t_double_mul (TDouble *self, TDouble *other)
+{
   g_return_val_if_fail (T_IS_DOUBLE (self), NULL);
   g_return_val_if_fail (T_IS_DOUBLE (other), NULL);
   double value;
@@ -368,31 +352,38 @@ t_double_mul (TDouble *self, TDouble *other) {
 }
 
 TDouble *
-t_double_div (TDouble *self, TDouble *other) {
+t_double_div (TDouble *self, TDouble *other)
+{
   g_return_val_if_fail (T_IS_DOUBLE (self), NULL);
   g_return_val_if_fail (T_IS_DOUBLE (other), NULL);
   double value;
 
-  if ((! t_double_get_value (other, &value)))
-    return NULL;
-  else if (value == 0) {
-    g_signal_emit (self, t_double_signal, 0);
-    return NULL;
-  }
+  if ((!t_double_get_value (other, &value)))
+    {
+      return NULL;
+    }
+  else if (value == 0)
+    {
+      g_signal_emit (self, t_double_signal, 0);
+      return NULL;
+    }
   return t_double_new (self->value / value);
 }
+
 TDouble *
-t_double_uminus (TDouble *self) {
+t_double_uminus (TDouble *self)
+{
   g_return_val_if_fail (T_IS_DOUBLE (self), NULL);
 
   return t_double_new (-self->value);
 }
 
 TDouble *
-t_double_new (double value) {
+t_double_new (double value)
+{
   TDouble *d;
 
-  d = g_object_new (T_TYPE_DOUBLE, NULL);
+  d        = g_object_new (T_TYPE_DOUBLE, NULL);
   d->value = value;
   return d;
 }
@@ -401,71 +392,84 @@ t_double_new (double value) {
 main.c
 
 \begin{lstlisting}[language=C, numbers=left]
-#include <glib-object.h>
 #include "tdouble.h"
+#include <glib-object.h>
 
 static void
-div_by_zero_cb (TDouble *self, gpointer user_data) {
+div_by_zero_cb (TDouble *self, gpointer user_data)
+{
   g_printerr ("\nError: division by zero.\n\n");
 }
 
 static void
-t_print (char *op, TDouble *d1, TDouble *d2, TDouble *d3) {
+t_print (char *op, TDouble *d1, TDouble *d2, TDouble *d3)
+{
   double v1, v2, v3;
 
-  if (! t_double_get_value (d1, &v1))
-    return;
-  if (! t_double_get_value (d2, &v2))
-    return;
-  if (! t_double_get_value (d3, &v3))
-    return;
+  if (!t_double_get_value (d1, &v1))
+    {
+      return;
+    }
+  if (!t_double_get_value (d2, &v2))
+    {
+      return;
+    }
+  if (!t_double_get_value (d3, &v3))
+    {
+      return;
+    }
 
   g_print ("%lf %s %lf = %lf\n", v1, op, v2, v3);
 }
 
 int
-main (int argc, char **argv) {
-  TDouble *d1, *d2, *d3;
-  double v1, v3;
+main (void)
+{
+  TDouble *d1 = t_double_new (10.0);
+  TDouble *d2 = t_double_new (20.0);
+  TDouble *d3;
+  if ((d3 = t_double_add (d1, d2)) != NULL)
+    {
+      t_print ("+", d1, d2, d3);
+      g_object_unref (d3);
+    }
 
-  d1 = t_double_new (10.0);
-  d2 = t_double_new (20.0);
-  if ((d3 = t_double_add (d1, d2)) != NULL) {
-    t_print ("+", d1, d2, d3);
-    g_object_unref (d3);
-  }
+  if ((d3 = t_double_sub (d1, d2)) != NULL)
+    {
+      t_print ("-", d1, d2, d3);
+      g_object_unref (d3);
+    }
 
-  if ((d3 = t_double_sub (d1, d2)) != NULL) {
-    t_print ("-", d1, d2, d3);
-    g_object_unref (d3);
-  }
+  if ((d3 = t_double_mul (d1, d2)) != NULL)
+    {
+      t_print ("*", d1, d2, d3);
+      g_object_unref (d3);
+    }
 
-  if ((d3 = t_double_mul (d1, d2)) != NULL) {
-    t_print ("*", d1, d2, d3);
-    g_object_unref (d3);
-  }
-
-  if ((d3 = t_double_div (d1, d2)) != NULL) {
-    t_print ("/", d1, d2, d3);
-    g_object_unref (d3);
-  }
+  if ((d3 = t_double_div (d1, d2)) != NULL)
+    {
+      t_print ("/", d1, d2, d3);
+      g_object_unref (d3);
+    }
 
   g_signal_connect (d1, "div-by-zero", G_CALLBACK (div_by_zero_cb), NULL);
   t_double_set_value (d2, 0.0);
-  if ((d3 = t_double_div (d1, d2)) != NULL) {
-    t_print ("/", d1, d2, d3);
-    g_object_unref (d3);
-  }
+  if ((d3 = t_double_div (d1, d2)) != NULL)
+    {
+      t_print ("/", d1, d2, d3);
+      g_object_unref (d3);
+    }
 
-  if ((d3 = t_double_uminus (d1)) != NULL && (t_double_get_value (d1, &v1)) && (t_double_get_value (d3, &v3))) {
-    g_print ("-%lf = %lf\n", v1, v3);
-    g_object_unref (d3);
-  }
+  double v1, v3;
+
+  if ((d3 = t_double_uminus (d1)) != NULL && (t_double_get_value (d1, &v1)) && (t_double_get_value (d3, &v3)))
+    {
+      g_print ("-%lf = %lf\n", v1, v3);
+      g_object_unref (d3);
+    }
 
   g_object_unref (d1);
   g_object_unref (d2);
-
-  return 0;
 }
 \end{lstlisting}
 

@@ -1,22 +1,28 @@
 #include "tdouble.h"
 
-struct _TDouble {
+#define T_DOUBLE_TYPE (t_double_get_type ())
+
+struct _TDouble
+{
   GObject parent;
-  double value;
+  double  value;
 };
 
 G_DEFINE_TYPE (TDouble, t_double, G_TYPE_OBJECT)
 
 static void
-t_double_class_init (TDoubleClass *class) {
+t_double_class_init (TDoubleClass *class)
+{
 }
 
 static void
-t_double_init (TDouble *self) {
+t_double_init (TDouble *self)
+{
 }
 
 gboolean
-t_double_get_value (TDouble *self, double *value) {
+t_double_get_value (TDouble *self, double *value)
+{
   g_return_val_if_fail (T_IS_DOUBLE (self), FALSE);
 
   *value = self->value;
@@ -24,17 +30,17 @@ t_double_get_value (TDouble *self, double *value) {
 }
 
 void
-t_double_set_value (TDouble *self, double value) {
+t_double_set_value (TDouble *self, double value)
+{
   g_return_if_fail (T_IS_DOUBLE (self));
 
   self->value = value;
 }
 
 TDouble *
-t_double_new (double value) {
-  TDouble *d;
-
-  d = g_object_new (T_TYPE_DOUBLE, NULL);
-  d->value = value;
+t_double_new (double value)
+{
+  TDouble *d = g_object_new (T_DOUBLE_TYPE, NULL);
+  d->value   = value;
   return d;
 }

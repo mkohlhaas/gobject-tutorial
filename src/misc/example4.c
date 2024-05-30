@@ -1,21 +1,16 @@
 #include <glib-object.h>
+#include <stdlib.h>
 
-#define T_TYPE_DOUBLE (t_double_get_type ())
-
-typedef struct _TDouble TDouble;
-struct _TDouble
+typedef struct _TDouble
 {
   GObject parent;
   double  value;
-};
+} TDouble;
 
-typedef struct _TDoubleClass TDoubleClass;
-struct _TDoubleClass
+typedef struct _TDoubleClass
 {
   GObjectClass parent_class;
-};
-
-G_DEFINE_TYPE (TDouble, t_double, G_TYPE_OBJECT)
+} TDoubleClass;
 
 static void
 t_double_class_init (TDoubleClass *class)
@@ -27,32 +22,38 @@ t_double_init (TDouble *self)
 {
 }
 
-int
-main (int argc, char **argv)
-{
-  GType    dtype;
-  TDouble *d;
+// creates t_double_get_type, …
+G_DEFINE_TYPE (TDouble, t_double, G_TYPE_OBJECT)
 
-  dtype = t_double_get_type (); /* or dtype = T_TYPE_DOUBLE */
+#define T_DOUBLE_TYPE (t_double_get_type ())
+
+int
+main (void)
+{
+  GType dtype = T_DOUBLE_TYPE;
+
   if (dtype)
     {
-      g_print ("Registration was a success. The type is %lx.\n", dtype);
+      g_print ("Type registration was successful!\n");
+      g_print ("The type ID is %lx.\n", dtype);
     }
   else
     {
-      g_print ("Registration failed.\n");
+      g_print ("Type registration failed.\n");
+      exit (EXIT_FAILURE);
     }
 
-  d = g_object_new (T_TYPE_DOUBLE, NULL);
+  TDouble *d = g_object_new (T_DOUBLE_TYPE, NULL);
   if (d)
     {
-      g_print ("Instantiation was a success. The instance address is %p.\n", d);
+      g_print ("Instantiation was successful!\n");
+      g_print ("The instance address is %p.\n", d);
     }
   else
     {
       g_print ("Instantiation failed.\n");
+      exit (EXIT_FAILURE);
     }
-  g_object_unref (d);
 
-  return 0;
+  g_object_unref (d);
 }

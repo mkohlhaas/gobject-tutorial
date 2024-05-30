@@ -200,25 +200,21 @@ follows.</p>
 class="sourceCode numberSource C numberLines"><code class="sourceCode c"><span id="cb4-1"><a href="#cb4-1"></a><span class="pp">#include </span><span class="im">&lt;glib-object.h&gt;</span></span>
 <span id="cb4-2"><a href="#cb4-2"></a></span>
 <span id="cb4-3"><a href="#cb4-3"></a><span class="dt">int</span></span>
-<span id="cb4-4"><a href="#cb4-4"></a>main <span class="op">(</span><span class="dt">int</span> argc<span class="op">,</span> <span class="dt">char</span> <span class="op">**</span>argv<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb4-5"><a href="#cb4-5"></a>  GObject <span class="op">*</span>instance1<span class="op">,</span> <span class="op">*</span>instance2<span class="op">;</span></span>
-<span id="cb4-6"><a href="#cb4-6"></a>  GObjectClass <span class="op">*</span>class1<span class="op">,</span> <span class="op">*</span>class2<span class="op">;</span></span>
-<span id="cb4-7"><a href="#cb4-7"></a>  </span>
-<span id="cb4-8"><a href="#cb4-8"></a>  instance1 <span class="op">=</span> g_object_new <span class="op">(</span>G_TYPE_OBJECT<span class="op">,</span> NULL<span class="op">);</span></span>
-<span id="cb4-9"><a href="#cb4-9"></a>  instance2 <span class="op">=</span> g_object_new <span class="op">(</span>G_TYPE_OBJECT<span class="op">,</span> NULL<span class="op">);</span></span>
-<span id="cb4-10"><a href="#cb4-10"></a>  g_print <span class="op">(</span><span class="st">&quot;The address of instance1 is </span><span class="sc">%p\n</span><span class="st">&quot;</span><span class="op">,</span> instance1<span class="op">);</span></span>
-<span id="cb4-11"><a href="#cb4-11"></a>  g_print <span class="op">(</span><span class="st">&quot;The address of instance2 is </span><span class="sc">%p\n</span><span class="st">&quot;</span><span class="op">,</span> instance2<span class="op">);</span></span>
-<span id="cb4-12"><a href="#cb4-12"></a></span>
-<span id="cb4-13"><a href="#cb4-13"></a>  class1 <span class="op">=</span> G_OBJECT_GET_CLASS <span class="op">(</span>instance1<span class="op">);</span></span>
-<span id="cb4-14"><a href="#cb4-14"></a>  class2 <span class="op">=</span> G_OBJECT_GET_CLASS <span class="op">(</span>instance2<span class="op">);</span></span>
-<span id="cb4-15"><a href="#cb4-15"></a>  g_print <span class="op">(</span><span class="st">&quot;The address of the class of instance1 is </span><span class="sc">%p\n</span><span class="st">&quot;</span><span class="op">,</span> class1<span class="op">);</span></span>
-<span id="cb4-16"><a href="#cb4-16"></a>  g_print <span class="op">(</span><span class="st">&quot;The address of the class of instance2 is </span><span class="sc">%p\n</span><span class="st">&quot;</span><span class="op">,</span> class2<span class="op">);</span></span>
-<span id="cb4-17"><a href="#cb4-17"></a></span>
-<span id="cb4-18"><a href="#cb4-18"></a>  g_object_unref <span class="op">(</span>instance1<span class="op">);</span></span>
-<span id="cb4-19"><a href="#cb4-19"></a>  g_object_unref <span class="op">(</span>instance2<span class="op">);</span></span>
-<span id="cb4-20"><a href="#cb4-20"></a></span>
-<span id="cb4-21"><a href="#cb4-21"></a>  <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
-<span id="cb4-22"><a href="#cb4-22"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb4-4"><a href="#cb4-4"></a>main <span class="op">(</span><span class="dt">int</span> argc<span class="op">,</span> <span class="dt">char</span> <span class="op">**</span>argv<span class="op">)</span></span>
+<span id="cb4-5"><a href="#cb4-5"></a><span class="op">{</span></span>
+<span id="cb4-6"><a href="#cb4-6"></a>  GObject <span class="op">*</span>instance1 <span class="op">=</span> g_object_new <span class="op">(</span>G_TYPE_OBJECT<span class="op">,</span> NULL<span class="op">);</span></span>
+<span id="cb4-7"><a href="#cb4-7"></a>  GObject <span class="op">*</span>instance2 <span class="op">=</span> g_object_new <span class="op">(</span>G_TYPE_OBJECT<span class="op">,</span> NULL<span class="op">);</span></span>
+<span id="cb4-8"><a href="#cb4-8"></a>  g_print <span class="op">(</span><span class="st">&quot;The address of instance1 is </span><span class="sc">%p\n</span><span class="st">&quot;</span><span class="op">,</span> instance1<span class="op">);</span></span>
+<span id="cb4-9"><a href="#cb4-9"></a>  g_print <span class="op">(</span><span class="st">&quot;The address of instance2 is </span><span class="sc">%p\n</span><span class="st">&quot;</span><span class="op">,</span> instance2<span class="op">);</span></span>
+<span id="cb4-10"><a href="#cb4-10"></a></span>
+<span id="cb4-11"><a href="#cb4-11"></a>  GObjectClass <span class="op">*</span>class1 <span class="op">=</span> G_OBJECT_GET_CLASS <span class="op">(</span>instance1<span class="op">);</span></span>
+<span id="cb4-12"><a href="#cb4-12"></a>  GObjectClass <span class="op">*</span>class2 <span class="op">=</span> G_OBJECT_GET_CLASS <span class="op">(</span>instance2<span class="op">);</span></span>
+<span id="cb4-13"><a href="#cb4-13"></a>  g_print <span class="op">(</span><span class="st">&quot;The address of the class of instance1 is </span><span class="sc">%p\n</span><span class="st">&quot;</span><span class="op">,</span> class1<span class="op">);</span></span>
+<span id="cb4-14"><a href="#cb4-14"></a>  g_print <span class="op">(</span><span class="st">&quot;The address of the class of instance2 is </span><span class="sc">%p\n</span><span class="st">&quot;</span><span class="op">,</span> class2<span class="op">);</span></span>
+<span id="cb4-15"><a href="#cb4-15"></a></span>
+<span id="cb4-16"><a href="#cb4-16"></a>  g_object_unref <span class="op">(</span>instance1<span class="op">);</span></span>
+<span id="cb4-17"><a href="#cb4-17"></a>  g_object_unref <span class="op">(</span>instance2<span class="op">);</span></span>
+<span id="cb4-18"><a href="#cb4-18"></a><span class="op">}</span></span></code></pre></div>
 <ul>
 <li>5-6: <code>instance1</code> and <code>instance2</code> are pointers
 that points GObject instances. <code>class1</code> and
@@ -288,36 +284,40 @@ is freed.</li>
 class="sourceCode numberSource C numberLines"><code class="sourceCode c"><span id="cb6-1"><a href="#cb6-1"></a><span class="pp">#include </span><span class="im">&lt;glib-object.h&gt;</span></span>
 <span id="cb6-2"><a href="#cb6-2"></a></span>
 <span id="cb6-3"><a href="#cb6-3"></a><span class="dt">static</span> <span class="dt">void</span></span>
-<span id="cb6-4"><a href="#cb6-4"></a>show_ref_count <span class="op">(</span>GObject <span class="op">*</span>instance<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb6-5"><a href="#cb6-5"></a>  <span class="cf">if</span> <span class="op">(</span>G_IS_OBJECT <span class="op">(</span>instance<span class="op">))</span></span>
-<span id="cb6-6"><a href="#cb6-6"></a>    <span class="co">/* Users should not use ref_count member in their program. */</span></span>
-<span id="cb6-7"><a href="#cb6-7"></a>    <span class="co">/* This is only for demonstration. */</span></span>
-<span id="cb6-8"><a href="#cb6-8"></a>    g_print <span class="op">(</span><span class="st">&quot;Reference count is </span><span class="sc">%d</span><span class="st">.</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">,</span> instance<span class="op">-&gt;</span>ref_count<span class="op">);</span></span>
-<span id="cb6-9"><a href="#cb6-9"></a>  <span class="cf">else</span></span>
-<span id="cb6-10"><a href="#cb6-10"></a>    g_print <span class="op">(</span><span class="st">&quot;Instance is not GObject.</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
-<span id="cb6-11"><a href="#cb6-11"></a><span class="op">}</span></span>
-<span id="cb6-12"><a href="#cb6-12"></a></span>
-<span id="cb6-13"><a href="#cb6-13"></a><span class="dt">int</span></span>
-<span id="cb6-14"><a href="#cb6-14"></a>main <span class="op">(</span><span class="dt">int</span> argc<span class="op">,</span> <span class="dt">char</span> <span class="op">**</span>argv<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb6-15"><a href="#cb6-15"></a>  GObject <span class="op">*</span>instance<span class="op">;</span></span>
-<span id="cb6-16"><a href="#cb6-16"></a>  </span>
-<span id="cb6-17"><a href="#cb6-17"></a>  instance <span class="op">=</span> g_object_new <span class="op">(</span>G_TYPE_OBJECT<span class="op">,</span> NULL<span class="op">);</span></span>
-<span id="cb6-18"><a href="#cb6-18"></a>  g_print <span class="op">(</span><span class="st">&quot;Call g_object_new.</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
-<span id="cb6-19"><a href="#cb6-19"></a>  show_ref_count <span class="op">(</span>instance<span class="op">);</span></span>
-<span id="cb6-20"><a href="#cb6-20"></a>  g_object_ref <span class="op">(</span>instance<span class="op">);</span></span>
-<span id="cb6-21"><a href="#cb6-21"></a>  g_print <span class="op">(</span><span class="st">&quot;Call g_object_ref.</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
-<span id="cb6-22"><a href="#cb6-22"></a>  show_ref_count <span class="op">(</span>instance<span class="op">);</span></span>
-<span id="cb6-23"><a href="#cb6-23"></a>  g_object_unref <span class="op">(</span>instance<span class="op">);</span></span>
-<span id="cb6-24"><a href="#cb6-24"></a>  g_print <span class="op">(</span><span class="st">&quot;Call g_object_unref.</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
+<span id="cb6-4"><a href="#cb6-4"></a>show_ref_count <span class="op">(</span>GObject <span class="op">*</span>instance<span class="op">)</span></span>
+<span id="cb6-5"><a href="#cb6-5"></a><span class="op">{</span></span>
+<span id="cb6-6"><a href="#cb6-6"></a>  <span class="cf">if</span> <span class="op">(</span>G_IS_OBJECT <span class="op">(</span>instance<span class="op">))</span></span>
+<span id="cb6-7"><a href="#cb6-7"></a>    <span class="op">{</span></span>
+<span id="cb6-8"><a href="#cb6-8"></a>      <span class="co">/* Users should not use ref_count member in their program. */</span></span>
+<span id="cb6-9"><a href="#cb6-9"></a>      <span class="co">/* This is only for demonstration. */</span></span>
+<span id="cb6-10"><a href="#cb6-10"></a>      g_print <span class="op">(</span><span class="st">&quot;Reference count is </span><span class="sc">%d</span><span class="st">.</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">,</span> instance<span class="op">-&gt;</span>ref_count<span class="op">);</span></span>
+<span id="cb6-11"><a href="#cb6-11"></a>    <span class="op">}</span></span>
+<span id="cb6-12"><a href="#cb6-12"></a>  <span class="cf">else</span></span>
+<span id="cb6-13"><a href="#cb6-13"></a>    <span class="op">{</span></span>
+<span id="cb6-14"><a href="#cb6-14"></a>      g_print <span class="op">(</span><span class="st">&quot;Instance is not GObject.</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
+<span id="cb6-15"><a href="#cb6-15"></a>    <span class="op">}</span></span>
+<span id="cb6-16"><a href="#cb6-16"></a><span class="op">}</span></span>
+<span id="cb6-17"><a href="#cb6-17"></a></span>
+<span id="cb6-18"><a href="#cb6-18"></a><span class="dt">int</span></span>
+<span id="cb6-19"><a href="#cb6-19"></a>main <span class="op">(</span><span class="dt">int</span> argc<span class="op">,</span> <span class="dt">char</span> <span class="op">**</span>argv<span class="op">)</span></span>
+<span id="cb6-20"><a href="#cb6-20"></a><span class="op">{</span></span>
+<span id="cb6-21"><a href="#cb6-21"></a>  GObject <span class="op">*</span>instance<span class="op">;</span></span>
+<span id="cb6-22"><a href="#cb6-22"></a></span>
+<span id="cb6-23"><a href="#cb6-23"></a>  instance <span class="op">=</span> g_object_new <span class="op">(</span>G_TYPE_OBJECT<span class="op">,</span> NULL<span class="op">);</span></span>
+<span id="cb6-24"><a href="#cb6-24"></a>  g_print <span class="op">(</span><span class="st">&quot;Call g_object_new.</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
 <span id="cb6-25"><a href="#cb6-25"></a>  show_ref_count <span class="op">(</span>instance<span class="op">);</span></span>
-<span id="cb6-26"><a href="#cb6-26"></a>  g_object_unref <span class="op">(</span>instance<span class="op">);</span></span>
-<span id="cb6-27"><a href="#cb6-27"></a>  g_print <span class="op">(</span><span class="st">&quot;Call g_object_unref.</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
-<span id="cb6-28"><a href="#cb6-28"></a>  g_print <span class="op">(</span><span class="st">&quot;Now the reference count is zero and the instance is destroyed.</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
-<span id="cb6-29"><a href="#cb6-29"></a>  g_print <span class="op">(</span><span class="st">&quot;The instance memories are possibly returned to the system.</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
-<span id="cb6-30"><a href="#cb6-30"></a>  g_print <span class="op">(</span><span class="st">&quot;Therefore, the access to the same address may cause a segmentation error.</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
-<span id="cb6-31"><a href="#cb6-31"></a>  </span>
-<span id="cb6-32"><a href="#cb6-32"></a>  <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
-<span id="cb6-33"><a href="#cb6-33"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb6-26"><a href="#cb6-26"></a>  g_object_ref <span class="op">(</span>instance<span class="op">);</span></span>
+<span id="cb6-27"><a href="#cb6-27"></a>  g_print <span class="op">(</span><span class="st">&quot;Call g_object_ref.</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
+<span id="cb6-28"><a href="#cb6-28"></a>  show_ref_count <span class="op">(</span>instance<span class="op">);</span></span>
+<span id="cb6-29"><a href="#cb6-29"></a>  g_object_unref <span class="op">(</span>instance<span class="op">);</span></span>
+<span id="cb6-30"><a href="#cb6-30"></a>  g_print <span class="op">(</span><span class="st">&quot;Call g_object_unref.</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
+<span id="cb6-31"><a href="#cb6-31"></a>  show_ref_count <span class="op">(</span>instance<span class="op">);</span></span>
+<span id="cb6-32"><a href="#cb6-32"></a>  g_object_unref <span class="op">(</span>instance<span class="op">);</span></span>
+<span id="cb6-33"><a href="#cb6-33"></a>  g_print <span class="op">(</span><span class="st">&quot;Call g_object_unref.</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
+<span id="cb6-34"><a href="#cb6-34"></a>  g_print <span class="op">(</span><span class="st">&quot;Now the reference count is zero and the instance is destroyed.</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
+<span id="cb6-35"><a href="#cb6-35"></a>  g_print <span class="op">(</span><span class="st">&quot;The instance memories are possibly returned to the system.</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
+<span id="cb6-36"><a href="#cb6-36"></a>  g_print <span class="op">(</span><span class="st">&quot;Therefore, the access to the same address may cause a segmentation error.</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
+<span id="cb6-37"><a href="#cb6-37"></a><span class="op">}</span></span></code></pre></div>
 <p>Now execute it.</p>
 <pre><code>$ cd src/misc; _build/example2
 bash: cd: src/misc: No such file or directory

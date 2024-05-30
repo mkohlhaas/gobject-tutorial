@@ -18,7 +18,7 @@ string_toupper (const char *s)
 }
 
 int
-main (int argc, char **argv)
+main (void)
 {
   char *s, *t;
 
@@ -27,5 +27,4 @@ main (int argc, char **argv)
   g_print ("s is %s\n", s);
   g_print ("t is %s\n", t);
   g_free (t);
-  return 0;
 }

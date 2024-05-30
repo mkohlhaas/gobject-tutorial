@@ -1,4 +1,4 @@
-This is LuaHBTeX, Version 1.16.0 (TeX Live 2023/VoidLinux)  (format=lualatex 2024.2.12)  29 MAY 2024 22:45
+This is LuaHBTeX, Version 1.16.0 (TeX Live 2023/VoidLinux)  (format=lualatex 2024.2.8)  30 MAY 2024 21:39
  restricted system commands enabled.
 **main.tex
 (./main.tex
@@ -1085,86 +1085,96 @@ File: lstmisc.sty 2023/02/27 1.9 (Carsten Heinz)
 <../image/class_instance.png, id=283, 192.72pt x 144.54pt>
 File: ../image/class_instance.png Graphic file (type png)
 <use ../image/class_instance.png>
-Package luatex.def Info: ../image/class_instance.png  used on input line 191.
+Package luatex.def Info: ../image/class_instance.png  used on input line 189.
 (luatex.def)             Requested size: 284.52711pt x 213.40634pt.
  [7<../image/class_instance.png>] [8]) (./sec3.tex [9] [10] [11] [12] [13]
-Overfull \hbox (14.6505pt too wide) in paragraph at lines 449--454
+Overfull \hbox (14.6505pt too wide) in paragraph at lines 472--477
 []\TU/lmr/m/n/10 Thanks to [][][], we are freed from writ-ing both-er-some code like [][][] and [][][].
  []
 
-[14] [15] [16] [17]) (./sec4.tex [18] [19] [20] [21] [22] [23] [24] [25])
-(./sec5.tex [26] [27]
-<../image/class_property1.png, id=1184, 289.08pt x 144.54pt>
+[14] [15] [16] [17] [18]) (./sec4.tex [19] [20] [21]
+Overfull \hbox (34.26984pt too wide) in paragraph at lines 319--320
+[][] 
+ []
+
+
+Overfull \hbox (131.47083pt too wide) in paragraph at lines 321--322
+[][] 
+ []
+
+[22] [23] [24] [25] [26]) (./sec5.tex [27] [28]
+<../image/class_property1.png, id=1252, 289.08pt x 144.54pt>
 File: ../image/class_property1.png Graphic file (type png)
 <use ../image/class_property1.png>
 Package luatex.def Info: ../image/class_property1.png  used on input line 214.
 (luatex.def)             Requested size: 426.81274pt x 213.40634pt.
- [28] [29<../image/class_property1.png>] [30]) (./sec6.tex [31] [32] [33] [34] 
-[35] [36] [37] [38] [39] [40] [41]
-<../image/tnumberclass_init.png, id=1867, 192.72pt x 144.54pt>
+ [29] [30<../image/class_property1.png>] [31]) (./sec6.tex [32] [33] [34] [35] 
+[36] [37] [38] [39] [40]
+[41] [42]
+<../image/tnumberclass_init.png, id=1935, 192.72pt x 144.54pt>
 File: ../image/tnumberclass_init.png Graphic file (type png)
 <use ../image/tnumberclass_init.png>
 Package luatex.def Info: ../image/tnumberclass_init.png  used on input line 927
 .
 (luatex.def)             Requested size: 341.43195pt x 256.08939pt.
- [42]
-<../image/tintclass_init.png, id=1898, 192.72pt x 144.54pt>
+ [43]
+<../image/tintclass_init.png, id=1966, 192.72pt x 144.54pt>
 File: ../image/tintclass_init.png Graphic file (type png)
 <use ../image/tintclass_init.png>
 Package luatex.def Info: ../image/tintclass_init.png  used on input line 962.
 (luatex.def)             Requested size: 341.43195pt x 256.08939pt.
-) (./sec7.tex
-[43<../image/tnumberclass_init.png>] [44<../image/tintclass_init.png>] [45]
-[46] [47] [48] [49]
-<../image/chainup.png, id=2155, 168.63pt x 144.54pt>
+) (./sec7.tex [44<../image/tnumberclass_init.png>] [45<../image/tintclass_init.p
+ng>] [46] [47] [48] [49] [50]
+<../image/chainup.png, id=2223, 168.63pt x 144.54pt>
 File: ../image/chainup.png Graphic file (type png)
 <use ../image/chainup.png>
 Package luatex.def Info: ../image/chainup.png  used on input line 590.
 (luatex.def)             Requested size: 298.76068pt x 256.08939pt.
- [50<../image/chainup.png>]
-<../image/chainup3.png, id=2162, 192.72pt x 144.54pt>
+ [51<../image/chainup.png>]
+<../image/chainup3.png, id=2231, 192.72pt x 144.54pt>
 File: ../image/chainup3.png Graphic file (type png)
 <use ../image/chainup3.png>
 Package luatex.def Info: ../image/chainup3.png  used on input line 607.
 (luatex.def)             Requested size: 341.43195pt x 256.08939pt.
-) (./sec8.tex [51<../image/chainup3.png>]
-<../image/state_diagram.png, id=2170, 192.72pt x 144.54pt>
+)
+(./sec8.tex [52<../image/chainup3.png>]
+<../image/state_diagram.png, id=2238, 192.72pt x 144.54pt>
 File: ../image/state_diagram.png Graphic file (type png)
 <use ../image/state_diagram.png>
 Package luatex.def Info: ../image/state_diagram.png  used on input line 130.
 (luatex.def)             Requested size: 341.43195pt x 256.08939pt.
- [52
+ [53
 Missing character: There is no ＼ (U+FF3C) in font [lmroman10-regular]:+tlig;!
-] [53<../image/state_diagram.png>] [54] [55] [56]) (./sec9.tex [57] [58]
-[59] [60] [61] [62] [63] [64] [65] [66]
+] [54<../image/state_diagram.png>] [55] [56] [57]) (./sec9.tex [58] [59]
+[60] [61] [62] [63] [64] [65] [66] [67]
 Overfull \hbox (22.98332pt too wide) in paragraph at lines 775--779
 []\TU/lmr/m/n/10 16: De-clares [][][] func-tion. It needs to be de-clared be-for
 e [][][]
  []
 
-[67] [68]
+[68] [69]
 Underfull \hbox (badness 1137) in paragraph at lines 967--972
 \TU/lmr/m/n/10 We used macros such as [][][], [][][] to build an in-ter-face. An
 d
  []
 
-) [69] (./main.aux)
+) [70] (./main.aux)
 
 LaTeX Warning: There were multiply-defined labels.
 
 )
 
 Here is how much of LuaTeX's memory you used:
- 26095 strings out of 478285
- 305428,1977958 words of node,token memory allocated
+ 26173 strings out of 478285
+ 305430,1977958 words of node,token memory allocated
  633 words of node memory still in use:
    7 hlist, 2 vlist, 2 rule, 1 local_par, 4 glue, 4 kern, 1 penalty, 1 margin_ke
 rn, 4 glyph, 11 attribute, 62 glue_spec, 11 attribute_list, 1 write, 1 user_defi
 ned, 3 pdf_action nodes
-   avail lists: 1:4,2:4999,3:539,4:675,5:4406,6:161,7:18467,8:2,9:11053,10:15,11
+   avail lists: 1:3,2:4998,3:538,4:675,5:4406,6:161,7:18465,8:2,9:11053,10:15,11
 :519
- 42762 multiletter control sequences out of 65536+600000
- 64 fonts using 19239195 bytes
+ 42776 multiletter control sequences out of 65536+600000
+ 64 fonts using 19239423 bytes
  93i,10n,121p,1000b,898s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texmf-dist/fonts/opentype/public/lm/lmroman9-regular.otf></usr/share
 /texmf-dist/fonts/opentype/public/lm/lmroman10-italic.otf></usr/share/texmf-dist
@@ -1174,10 +1184,10 @@ pe/public/lm/lmmono9-regular.otf></usr/share/texmf-dist/fonts/opentype/public/lm
 -bold.otf></usr/share/texmf-dist/fonts/opentype/public/lm/lmroman12-regular.otf>
 </usr/share/texmf-dist/fonts/opentype/public/lm/lmroman17-regular.otf></usr/shar
 e/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt9.pfb>
-Output written on main.pdf (69 pages, 621516 bytes).
+Output written on main.pdf (70 pages, 624059 bytes).
 
-PDF statistics: 3398 PDF objects out of 3580 (max. 8388607)
- 3255 compressed objects within 33 object streams
- 2654 named destinations out of 2984 (max. 131072)
+PDF statistics: 3468 PDF objects out of 3580 (max. 8388607)
+ 3323 compressed objects within 34 object streams
+ 2718 named destinations out of 2984 (max. 131072)
  553 words of extra memory for PDF output out of 10000 (max. 100000000)
 

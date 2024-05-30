@@ -833,11 +833,11 @@ exchanged.</li>
 <code>meson.buld</code>, which controls the compilation process, is as
 follows.</p>
 <div class="sourceCode" id="cb9"><pre
-class="sourceCode numberSource numberLines"><code class="sourceCode"><span id="cb9-1"><a href="#cb9-1"></a>project (&#39;tnumber&#39;, &#39;c&#39;)</span>
+class="sourceCode numberSource numberLines"><code class="sourceCode"><span id="cb9-1"><a href="#cb9-1"></a>project(&#39;tnumber&#39;, &#39;c&#39;)</span>
 <span id="cb9-2"><a href="#cb9-2"></a></span>
 <span id="cb9-3"><a href="#cb9-3"></a>gobjdep = dependency(&#39;gobject-2.0&#39;)</span>
 <span id="cb9-4"><a href="#cb9-4"></a></span>
-<span id="cb9-5"><a href="#cb9-5"></a>sourcefiles = files(&#39;main.c&#39;, &#39;tnumber.c&#39;, &#39;tint.c&#39;, &#39;tdouble.c&#39;)</span>
+<span id="cb9-5"><a href="#cb9-5"></a>sourcefiles = files(&#39;main.c&#39;, &#39;tdouble.c&#39; &#39;tint.c&#39;, &#39;tnumber.c&#39;,)</span>
 <span id="cb9-6"><a href="#cb9-6"></a></span>
 <span id="cb9-7"><a href="#cb9-7"></a>executable(&#39;tnumber&#39;, sourcefiles, dependencies: gobjdep, install: false)</span></code></pre></div>
 <p>Compilation and execution is done by the usual way.</p>

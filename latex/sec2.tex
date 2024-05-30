@@ -111,24 +111,22 @@ as follows.
 #include <glib-object.h>
 
 int
-main (int argc, char **argv) {
-  GObject *instance1, *instance2;
-  GObjectClass *class1, *class2;
-  
-  instance1 = g_object_new (G_TYPE_OBJECT, NULL);
-  instance2 = g_object_new (G_TYPE_OBJECT, NULL);
+main (void)
+{
+  GObject *instance1 = g_object_new (G_TYPE_OBJECT, NULL);
+  GObject *instance2 = g_object_new (G_TYPE_OBJECT, NULL);
   g_print ("The address of instance1 is %p\n", instance1);
   g_print ("The address of instance2 is %p\n", instance2);
 
-  class1 = G_OBJECT_GET_CLASS (instance1);
-  class2 = G_OBJECT_GET_CLASS (instance2);
+  GObjectClass *class1 = G_OBJECT_GET_CLASS (instance1);
+  GObjectClass *class2 = G_OBJECT_GET_CLASS (instance2);
+
   g_print ("The address of the class of instance1 is %p\n", class1);
   g_print ("The address of the class of instance2 is %p\n", class2);
+  g_print ("Class Name: %s\n", G_OBJECT_CLASS_NAME (class1));
 
   g_object_unref (instance1);
   g_object_unref (instance2);
-
-  return 0;
 }
 \end{lstlisting}
 
@@ -231,20 +229,22 @@ above.
 #include <glib-object.h>
 
 static void
-show_ref_count (GObject *instance) {
+show_ref_count (GObject *instance)
+{
   if (G_IS_OBJECT (instance))
-    /* Users should not use ref_count member in their program. */
-    /* This is only for demonstration. */
-    g_print ("Reference count is %d.\n", instance->ref_count);
+    {
+      g_print ("Reference count is %d.\n", instance->ref_count);
+    }
   else
-    g_print ("Instance is not GObject.\n");
+    {
+      g_print ("Instance is not a GObject.\n");
+    }
 }
 
 int
-main (int argc, char **argv) {
-  GObject *instance;
-  
-  instance = g_object_new (G_TYPE_OBJECT, NULL);
+main (void)
+{
+  GObject *instance = g_object_new (G_TYPE_OBJECT, NULL);
   g_print ("Call g_object_new.\n");
   show_ref_count (instance);
   g_object_ref (instance);
@@ -254,12 +254,11 @@ main (int argc, char **argv) {
   g_print ("Call g_object_unref.\n");
   show_ref_count (instance);
   g_object_unref (instance);
+
   g_print ("Call g_object_unref.\n");
   g_print ("Now the reference count is zero and the instance is destroyed.\n");
   g_print ("The instance memories are possibly returned to the system.\n");
   g_print ("Therefore, the access to the same address may cause a segmentation error.\n");
-  
-  return 0;
 }
 \end{lstlisting}
 
