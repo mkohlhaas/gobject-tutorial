@@ -13,7 +13,6 @@ div_by_zero_default_cb (TNumber *self)
 static void
 t_number_class_init (TNumberClass *class)
 {
-
   /* virtual functions */
   class->add         = NULL;
   class->sub         = NULL;
@@ -22,9 +21,11 @@ t_number_class_init (TNumberClass *class)
   class->uminus      = NULL;
   class->to_s        = NULL;
   class->div_by_zero = div_by_zero_default_cb;
-  t_number_signal    = g_signal_new ("div-by-zero", G_TYPE_FROM_CLASS (class),
-                                     G_SIGNAL_RUN_LAST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
-                                     G_STRUCT_OFFSET (TNumberClass, div_by_zero), NULL, NULL, NULL, G_TYPE_NONE, 0);
+
+  GSignalFlags signal_flags = G_SIGNAL_RUN_LAST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS;
+  GType        itype        = G_TYPE_FROM_CLASS (class);
+  guint        class_offset = G_STRUCT_OFFSET (TNumberClass, div_by_zero);
+  t_number_signal = g_signal_new ("div-by-zero", itype, signal_flags, class_offset, NULL, NULL, NULL, G_TYPE_NONE, 0);
 }
 
 static void
@@ -32,54 +33,26 @@ t_number_init (TNumber *self)
 {
 }
 
-TNumber *
-t_number_add (TNumber *self, TNumber *other)
-{
-  g_return_val_if_fail (T_IS_NUMBER (self), NULL);
-  g_return_val_if_fail (T_IS_NUMBER (other), NULL);
-  TNumberClass *class = T_NUMBER_GET_CLASS (self);
-  return class->add ? class->add (self, other) : NULL;
-}
+#define T_NUMBER_BIN_OP(op)                                                                                            \
+  TNumber *t_number_##op (TNumber *self, TNumber *other)                                                               \
+  {                                                                                                                    \
+    g_return_val_if_fail (T_IS_NUMBER (self), NULL);                                                                   \
+    g_return_val_if_fail (T_IS_NUMBER (other), NULL);                                                                  \
+    TNumberClass *class = T_NUMBER_GET_CLASS (self);                                                                   \
+    return class->op ? class->op (self, other) : NULL;                                                                 \
+  }
 
-TNumber *
-t_number_sub (TNumber *self, TNumber *other)
-{
-  g_return_val_if_fail (T_IS_NUMBER (self), NULL);
-  g_return_val_if_fail (T_IS_NUMBER (other), NULL);
-  TNumberClass *class = T_NUMBER_GET_CLASS (self);
-  return class->sub ? class->sub (self, other) : NULL;
-}
+#define T_NUMBER_UNI_OP(op, type)                                                                                      \
+  type *t_number_##op (TNumber *self)                                                                                  \
+  {                                                                                                                    \
+    g_return_val_if_fail (T_IS_NUMBER (self), NULL);                                                                   \
+    TNumberClass *class = T_NUMBER_GET_CLASS (self);                                                                   \
+    return class->op ? class->op (self) : NULL;                                                                        \
+  }
 
-TNumber *
-t_number_mul (TNumber *self, TNumber *other)
-{
-  g_return_val_if_fail (T_IS_NUMBER (self), NULL);
-  g_return_val_if_fail (T_IS_NUMBER (other), NULL);
-  TNumberClass *class = T_NUMBER_GET_CLASS (self);
-  return class->mul ? class->mul (self, other) : NULL;
-}
-
-TNumber *
-t_number_div (TNumber *self, TNumber *other)
-{
-  g_return_val_if_fail (T_IS_NUMBER (self), NULL);
-  g_return_val_if_fail (T_IS_NUMBER (other), NULL);
-  TNumberClass *class = T_NUMBER_GET_CLASS (self);
-  return class->div ? class->div (self, other) : NULL;
-}
-
-TNumber *
-t_number_uminus (TNumber *self)
-{
-  g_return_val_if_fail (T_IS_NUMBER (self), NULL);
-  TNumberClass *class = T_NUMBER_GET_CLASS (self);
-  return class->uminus ? class->uminus (self) : NULL;
-}
-
-char *
-t_number_to_s (TNumber *self)
-{
-  g_return_val_if_fail (T_IS_NUMBER (self), NULL);
-  TNumberClass *class = T_NUMBER_GET_CLASS (self);
-  return class->to_s ? class->to_s (self) : NULL;
-}
+T_NUMBER_BIN_OP (add)
+T_NUMBER_BIN_OP (sub)
+T_NUMBER_BIN_OP (mul)
+T_NUMBER_BIN_OP (div)
+T_NUMBER_UNI_OP (uminus, TNumber)
+T_NUMBER_UNI_OP (to_s, char)
