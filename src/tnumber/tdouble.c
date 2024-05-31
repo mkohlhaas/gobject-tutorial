@@ -1,146 +1,171 @@
-#include "tnumber.h"
 #include "tdouble.h"
 #include "tint.h"
+#include "tnumber.h"
 
-#define PROP_DOUBLE 1
+#define PROP_DOUBLE_ID 1
+
 static GParamSpec *double_property = NULL;
 
-struct _TDouble {
+struct _TDouble
+{
   TNumber parent;
-  double value;
+  double  value;
 };
 
 G_DEFINE_TYPE (TDouble, t_double, T_TYPE_NUMBER)
 
 static void
-t_double_set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec) {
+t_double_set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec)
+{
   TDouble *self = T_DOUBLE (object);
-  if (property_id == PROP_DOUBLE) {
-    self->value = g_value_get_double (value);
-  } else
-    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-}
-
-static void
-t_double_get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec) {
-  TDouble *self = T_DOUBLE (object);
-
-  if (property_id == PROP_DOUBLE)
-    g_value_set_double (value, self->value);
+  if (property_id == PROP_DOUBLE_ID)
+    {
+      self->value = g_value_get_double (value);
+    }
   else
-    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+    {
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+    }
 }
 
 static void
-t_double_init (TDouble *self) {
+t_double_get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec)
+{
+  TDouble *self = T_DOUBLE (object);
+
+  if (property_id == PROP_DOUBLE_ID)
+    {
+      g_value_set_double (value, self->value);
+    }
+  else
+    {
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+    }
 }
 
-/* arithmetic operator */
-/* These operators create a new instance and return a pointer to it. */
-#define t_double_binary_op(op) \
-  int i; \
-  double d; \
-  if (T_IS_INT (other)) { \
-    g_object_get (T_INT (other), "value", &i, NULL); \
-    return  T_NUMBER (t_double_new_with_value (T_DOUBLE(self)->value op (double) i)); \
-  } else { \
-    g_object_get (T_DOUBLE (other), "value", &d, NULL); \
-    return  T_NUMBER (t_double_new_with_value (T_DOUBLE(self)->value op d)); \
-  }
+static void
+t_double_init (TDouble *self)
+{
+}
+
+#define t_double_binary_op(op)                                                                                         \
+  int    i;                                                                                                            \
+  double d;                                                                                                            \
+  if (T_IS_INT (other))                                                                                                \
+    {                                                                                                                  \
+      g_object_get (T_INT (other), "value", &i, NULL);                                                                 \
+      return T_NUMBER (t_double_new_with_value (T_DOUBLE (self)->value op (double) i));                                \
+    }                                                                                                                  \
+  else                                                                                                                 \
+    {                                                                                                                  \
+      g_object_get (T_DOUBLE (other), "value", &d, NULL);                                                              \
+      return T_NUMBER (t_double_new_with_value (T_DOUBLE (self)->value op d));                                         \
+    }
 
 static TNumber *
-t_double_add (TNumber *self, TNumber *other) {
+t_double_add (TNumber *self, TNumber *other)
+{
   g_return_val_if_fail (T_IS_DOUBLE (self), NULL);
-
   t_double_binary_op (+)
 }
 
 static TNumber *
-t_double_sub (TNumber *self, TNumber *other) {
+t_double_sub (TNumber *self, TNumber *other)
+{
   g_return_val_if_fail (T_IS_DOUBLE (self), NULL);
-
   t_double_binary_op (-)
 }
 
 static TNumber *
-t_double_mul (TNumber *self, TNumber *other) {
+t_double_mul (TNumber *self, TNumber *other)
+{
   g_return_val_if_fail (T_IS_DOUBLE (self), NULL);
-
   t_double_binary_op (*)
 }
 
 static TNumber *
-t_double_div (TNumber *self, TNumber *other) {
+t_double_div (TNumber *self, TNumber *other)
+{
   g_return_val_if_fail (T_IS_DOUBLE (self), NULL);
 
-  int i;
-  double d;
-
-  if (T_IS_INT (other)) {
-    g_object_get (T_INT (other), "value", &i, NULL);
-    if (i == 0) {
-      g_signal_emit_by_name (self, "div-by-zero");
-      return NULL;
-    } else
-      return  T_NUMBER (t_double_new_with_value (T_DOUBLE(self)->value / (double) i));
-  } else {
-    g_object_get (T_DOUBLE (other), "value", &d, NULL);
-    if (d == 0) {
-      g_signal_emit_by_name (self, "div-by-zero");
-      return NULL;
-    } else
-      return  T_NUMBER (t_double_new_with_value (T_DOUBLE(self)->value / d));
-  }
+  if (T_IS_INT (other))
+    {
+      int i;
+      g_object_get (T_INT (other), "value", &i, NULL);
+      if (i == 0)
+        {
+          g_signal_emit_by_name (self, "div-by-zero");
+          return NULL;
+        }
+      else
+        {
+          return T_NUMBER (t_double_new_with_value (T_DOUBLE (self)->value / (double)i));
+        }
+    }
+  else
+    {
+      double d;
+      g_object_get (T_DOUBLE (other), "value", &d, NULL);
+      if (d == 0)
+        {
+          g_signal_emit_by_name (self, "div-by-zero");
+          return NULL;
+        }
+      else
+        {
+          return T_NUMBER (t_double_new_with_value (T_DOUBLE (self)->value / d));
+        }
+    }
 }
 
 static TNumber *
-t_double_uminus (TNumber *self) {
+t_double_uminus (TNumber *self)
+{
   g_return_val_if_fail (T_IS_DOUBLE (self), NULL);
-
-  return T_NUMBER (t_double_new_with_value (- T_DOUBLE(self)->value));
+  return T_NUMBER (t_double_new_with_value (-T_DOUBLE (self)->value));
 }
 
 static char *
-t_double_to_s (TNumber *self) {
+t_double_to_s (TNumber *self)
+{
   g_return_val_if_fail (T_IS_DOUBLE (self), NULL);
 
   double d;
-
   g_object_get (T_DOUBLE (self), "value", &d, NULL);
-  return g_strdup_printf ("%lf", d);
+  return g_strdup_printf ("%f", d);
 }
 
 static void
-t_double_class_init (TDoubleClass *class) {
-  TNumberClass *tnumber_class = T_NUMBER_CLASS (class);
-  GObjectClass *gobject_class = G_OBJECT_CLASS (class);
+t_double_class_init (TDoubleClass *class)
+{
 
   /* override virtual functions */
-  tnumber_class->add = t_double_add;
-  tnumber_class->sub = t_double_sub;
-  tnumber_class->mul = t_double_mul;
-  tnumber_class->div = t_double_div;
-  tnumber_class->uminus = t_double_uminus;
-  tnumber_class->to_s = t_double_to_s;
+  TNumberClass *tnumber_class = T_NUMBER_CLASS (class);
+  tnumber_class->add          = t_double_add;
+  tnumber_class->sub          = t_double_sub;
+  tnumber_class->mul          = t_double_mul;
+  tnumber_class->div          = t_double_div;
+  tnumber_class->uminus       = t_double_uminus;
+  tnumber_class->to_s         = t_double_to_s;
 
+  GObjectClass *gobject_class = G_OBJECT_CLASS (class);
   gobject_class->set_property = t_double_set_property;
   gobject_class->get_property = t_double_get_property;
-  double_property = g_param_spec_double ("value", "val", "Double value", -G_MAXDOUBLE, G_MAXDOUBLE, 0, G_PARAM_READWRITE);
-  g_object_class_install_property (gobject_class, PROP_DOUBLE, double_property);
+  double_property
+      = g_param_spec_double ("value", "val", "Double value", -G_MAXDOUBLE, G_MAXDOUBLE, 0, G_PARAM_READWRITE);
+  g_object_class_install_property (gobject_class, PROP_DOUBLE_ID, double_property);
 }
 
 TDouble *
-t_double_new_with_value (double value) {
-  TDouble *d;
-
-  d = g_object_new (T_TYPE_DOUBLE, "value", value, NULL);
+t_double_new_with_value (double value)
+{
+  TDouble *d = g_object_new (T_TYPE_DOUBLE, "value", value, NULL);
   return d;
 }
 
 TDouble *
-t_double_new (void) {
-  TDouble *d;
-
-  d = g_object_new (T_TYPE_DOUBLE, NULL);
+t_double_new (void)
+{
+  TDouble *d = g_object_new (T_TYPE_DOUBLE, NULL);
   return d;
 }
