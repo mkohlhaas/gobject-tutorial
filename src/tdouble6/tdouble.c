@@ -1,136 +1,126 @@
 #include "tdouble.h"
 
-static guint t_double_signal;
+#define T_DOUBLE_TYPE  (t_double_get_type ())
+#define PROP_DOUBLE_ID 1
 
-#define PROP_DOUBLE 1
-static GParamSpec *double_property = NULL;
+// -- Internals ----------------------------------------------------------------------------------------------------- //
 
-struct _TDouble {
+struct _TDouble
+{
   GObject parent;
-  double value;
+  double  value;
 };
+
+static guint       t_double_signal_div_by_zero;
+static GParamSpec *double_property = NULL;
 
 G_DEFINE_TYPE (TDouble, t_double, G_TYPE_OBJECT)
 
 static void
-div_by_zero_default_cb (TDouble *self) {
-  g_printerr ("\nError: division by zero.\n\n");
-}
-
-static void
-t_double_set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec) {
+t_double_set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec)
+{
   TDouble *self = T_DOUBLE (object);
 
-  if (property_id == PROP_DOUBLE)
-    self->value = g_value_get_double (value);
+  if (property_id == PROP_DOUBLE_ID)
+    {
+      self->value = g_value_get_double (value);
+    }
   else
-    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+    {
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+    }
 }
 
 static void
-t_double_get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec) {
+t_double_get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec)
+{
   TDouble *self = T_DOUBLE (object);
 
-  if (property_id == PROP_DOUBLE)
-    g_value_set_double (value, self->value);
+  if (property_id == PROP_DOUBLE_ID)
+    {
+      g_value_set_double (value, self->value);
+    }
   else
-    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-
+    {
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+    }
 }
 
 static void
-t_double_class_init (TDoubleClass *class) {
+div_by_zero_default_cb (TDouble *self, gpointer user_data)
+{
+  g_printerr ("Error in %s: Division by Zero.\n", __FILE__);
+}
+
+static void
+t_double_class_init (TDoubleClass *class)
+{
+  const gchar *signal_name    = "div-by-zero";
+  GSignalFlags signal_flags   = G_SIGNAL_RUN_LAST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS;
+  GType        class_type     = G_TYPE_FROM_CLASS (class);
+  GCallback    default_cb     = G_CALLBACK (div_by_zero_default_cb);
+  t_double_signal_div_by_zero = g_signal_new_class_handler (signal_name, class_type, signal_flags, default_cb, NULL,
+                                                            NULL, NULL, G_TYPE_NONE, 0);
+
+  // register property "value"
   GObjectClass *gobject_class = G_OBJECT_CLASS (class);
-
-  t_double_signal =
-  g_signal_new_class_handler ("div-by-zero",
-                              G_TYPE_FROM_CLASS (class),
-                              G_SIGNAL_RUN_LAST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
-                              G_CALLBACK (div_by_zero_default_cb),
-                              NULL /* accumulator */,
-                              NULL /* accumulator data */,
-                              NULL /* C marshaller */,
-                              G_TYPE_NONE /* return_type */,
-                              0     /* n_params */
-                              );
-
   gobject_class->set_property = t_double_set_property;
   gobject_class->get_property = t_double_get_property;
-  double_property = g_param_spec_double ("value", "val", "Double value", -G_MAXDOUBLE, G_MAXDOUBLE, 0.0, G_PARAM_READWRITE);
-  g_object_class_install_property (gobject_class, PROP_DOUBLE, double_property);
+  double_property
+      = g_param_spec_double ("value", "val", "Double value", -G_MAXDOUBLE, G_MAXDOUBLE, 0.0, G_PARAM_READWRITE);
+  g_object_class_install_property (gobject_class, PROP_DOUBLE_ID, double_property);
 }
 
 static void
-t_double_init (TDouble *self) {
+t_double_init (TDouble *d)
+{
 }
 
-/* arithmetic operator */
-/* These operators create a new instance and return a pointer to it. */
-#define t_double_binary_op(op) \
-  g_object_get (other, "value", &value, NULL); \
-  return t_double_new_with_value (self->value op value);
+// ---------- API --------------------------------------------------------------------------------------------------- //
 
+// constructor
 TDouble *
-t_double_add (TDouble *self, TDouble *other) {
-  g_return_val_if_fail (T_IS_DOUBLE (self), NULL);
-  g_return_val_if_fail (T_IS_DOUBLE (other), NULL);
-  double value;
-
-  t_double_binary_op (+)
+t_double_new (double value)
+{
+  TDouble *d = g_object_new (T_DOUBLE_TYPE, "value", value, NULL);
+  // d->value   = value;
+  return d;
 }
 
-TDouble *
-t_double_sub (TDouble *self, TDouble *other) {
-  g_return_val_if_fail (T_IS_DOUBLE (self), NULL);
-  g_return_val_if_fail (T_IS_DOUBLE (other), NULL);
-  double value;
-
-  t_double_binary_op (-)
-}
-
-TDouble *
-t_double_mul (TDouble *self, TDouble *other) {
-  g_return_val_if_fail (T_IS_DOUBLE (self), NULL);
-  g_return_val_if_fail (T_IS_DOUBLE (other), NULL);
-  double value;
-
-  t_double_binary_op (*)
-}
-
-TDouble *
-t_double_div (TDouble *self, TDouble *other) {
-  g_return_val_if_fail (T_IS_DOUBLE (self), NULL);
-  g_return_val_if_fail (T_IS_DOUBLE (other), NULL);
-  double value;
-
-  g_object_get (other, "value", &value, NULL);
-  if (value == 0) {
-    g_signal_emit (self, t_double_signal, 0);
-    return NULL;
+// arithmetic operations
+#define T_DOUBLE_OP(op_name, op)                                                                                       \
+  TDouble *t_double_##op_name (TDouble *self, TDouble *other)                                                          \
+  {                                                                                                                    \
+    g_return_val_if_fail (T_IS_DOUBLE (self), NULL);                                                                   \
+    g_return_val_if_fail (T_IS_DOUBLE (other), NULL);                                                                  \
+    return t_double_new (self->value op other->value);                                                                 \
   }
-  return t_double_new_with_value (self->value / value);
-}
+
+T_DOUBLE_OP (add, +);
+T_DOUBLE_OP (mul, *);
+T_DOUBLE_OP (sub, -);
 
 TDouble *
-t_double_uminus (TDouble *self) {
+t_double_div (TDouble *self, TDouble *other)
+{
   g_return_val_if_fail (T_IS_DOUBLE (self), NULL);
+  g_return_val_if_fail (T_IS_DOUBLE (other), NULL);
 
-  return t_double_new_with_value (-self->value);
+  double right_val = other->value;
+  if (!right_val)
+    {
+      g_signal_emit (other, t_double_signal_div_by_zero, 0);
+      return NULL;
+    }
+
+  double left_val = self->value;
+  return t_double_new (left_val / right_val);
 }
 
+// unary minus
 TDouble *
-t_double_new_with_value (double value) {
-  TDouble *d;
-
-  d = g_object_new (T_TYPE_DOUBLE, "value", value, NULL);
-  return d;
+t_double_uminus (TDouble *self)
+{
+  g_return_val_if_fail (T_IS_DOUBLE (self), NULL);
+  return t_double_new (-self->value);
 }
-
-TDouble *
-t_double_new (void) {
-  TDouble *d;
-
-  d = g_object_new (T_TYPE_DOUBLE, NULL);
-  return d;
-}
-

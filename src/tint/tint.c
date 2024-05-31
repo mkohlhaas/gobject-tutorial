@@ -105,7 +105,7 @@ t_int_div (TInt *self, TInt *other) {
 
   g_object_get (other, "value", &value, NULL);
   if (value == 0) {
-    g_signal_emit (self, t_int_signal, 0);
+    g_signal_emit (other, t_int_signal, 0);
     return NULL;
   }
   return t_int_new_with_value (self->value / value);
