@@ -58,7 +58,7 @@ main (void)
   const char *str[] = { "123", "456", "789" };
   int         i;
 
-  for (i = 0; i < 3; ++i)
+  for (i = 0; i < sizeof numstr / sizeof (numstr[0]); ++i)
     {
       numstr[i] = t_num_str_new ();
       t_str_set_string (T_STR (numstr[i]), str[i]);

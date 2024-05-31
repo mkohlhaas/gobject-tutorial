@@ -14,7 +14,7 @@ struct _TNumStr
 
 G_DEFINE_TYPE (TNumStr, t_num_str, T_TYPE_STR)
 
-static int
+static num_type
 t_num_str_string_type (const char *string)
 {
   const char *t;
@@ -57,6 +57,7 @@ t_num_str_string_type (const char *string)
           break;
         }
     }
+
   if (stat == 4)
     {
       return t_int;
@@ -71,10 +72,6 @@ t_num_str_string_type (const char *string)
     }
 }
 
-/* This function overrides t_str_set_string. */
-/* And it also changes the behavior of setting the "string" property. */
-/* On TStr => just set the "string" property */
-/* On TNumStr => set the "string" property and set the type of the string. */
 static void
 t_num_str_real_set_string (TStr *self, const char *s)
 {
@@ -91,8 +88,7 @@ t_num_str_init (TNumStr *self)
 static void
 t_num_str_class_init (TNumStrClass *class)
 {
-  TStrClass *t_str_class = T_STR_CLASS (class);
-
+  TStrClass *t_str_class  = T_STR_CLASS (class);
   t_str_class->set_string = t_num_str_real_set_string;
 }
 
@@ -100,20 +96,17 @@ int
 t_num_str_get_string_type (TNumStr *self)
 {
   g_return_val_if_fail (T_IS_NUM_STR (self), -1);
-
   return self->type;
 }
 
-/* setter and getter */
+// setter and getter
 void
 t_num_str_set_from_t_number (TNumStr *self, TNumber *num)
 {
   g_return_if_fail (T_IS_NUM_STR (self));
   g_return_if_fail (T_IS_NUMBER (num));
 
-  char *s;
-
-  s = t_number_to_s (T_NUMBER (num));
+  char *s = t_number_to_s (T_NUMBER (num));
   t_str_set_string (T_STR (self), s);
   g_free (s);
 }
@@ -142,16 +135,12 @@ t_num_str_get_t_number (TNumStr *self)
   return tnum;
 }
 
-/* create a new TNumStr instance */
-
 TNumStr *
 t_num_str_new_with_tnumber (TNumber *num)
 {
   g_return_val_if_fail (T_IS_NUMBER (num), NULL);
 
-  TNumStr *numstr;
-
-  numstr = t_num_str_new ();
+  TNumStr *numstr = t_num_str_new ();
   t_num_str_set_from_t_number (numstr, num);
   return numstr;
 }

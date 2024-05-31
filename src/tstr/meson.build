@@ -9,7 +9,8 @@ test1files = files(
   'test1.c',
   'tstr.c',
 )
-executable('test1', test1files, dependencies: gobjdep, install: false)
+test1 = executable('test1', test1files, dependencies: gobjdep, install: false)
+test('test1', test1)
 
 test2files = files(
   '../tnumber/tdouble.c',
@@ -19,7 +20,8 @@ test2files = files(
   'tnumstr.c',
   'tstr.c',
 )
-executable('test2', test2files, dependencies: gobjdep, install: false)
+test2 = executable('test2', test2files, dependencies: gobjdep, install: false)
+test('test2', test2)
 
 sourcefiles = files(
   '../tnumber/tdouble.c',
